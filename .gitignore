@@ -1,0 +1,11 @@
+# Claude interne Dateien
+.claude/
+
+# Backup — nicht ins Repo
+index-backup-*.html
+
+# Alte Notizen
+App site.txt
+
+# Sync-Config enthält URL + Secret
+baro-sync.config.json

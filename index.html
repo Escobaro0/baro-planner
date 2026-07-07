@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Baran">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="apple-touch-startup-image" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMGEwYTBmIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSIzNiIgZmlsbD0idXJsKCNnKSIgb3BhY2l0eT0iMC4xNSIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnIiBjeD0iNTAlIiBjeT0iMzAlIiByPSI3MCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZkMTY2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBhMGEwZiIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPHRleHQgeD0iOTAiIHk9IjEyNSIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwOCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZDE2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QjwvdGV4dD4KPC9zdmc+">
+<style>
+  /* Splash screen background */
+  body { background: #0a0a0f; }
+</style>
+<title>Baran's Planner</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMGEwYTBmIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSIzNiIgZmlsbD0idXJsKCNnKSIgb3BhY2l0eT0iMC4xNSIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnIiBjeD0iNTAlIiBjeT0iMzAlIiByPSI3MCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZkMTY2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBhMGEwZiIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPHRleHQgeD0iOTAiIHk9IjEyNSIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwOCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZDE2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QjwvdGV4dD4KPC9zdmc+">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj4KICA8cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjM2IiBmaWxsPSIjMGEwYTBmIi8+CiAgPHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIxODAiIHJ4PSIzNiIgZmlsbD0idXJsKCNnKSIgb3BhY2l0eT0iMC4xNSIvPgogIDxkZWZzPgogICAgPHJhZGlhbEdyYWRpZW50IGlkPSJnIiBjeD0iNTAlIiBjeT0iMzAlIiByPSI3MCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdG9wLWNvbG9yPSIjZmZkMTY2Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3RvcC1jb2xvcj0iIzBhMGEwZiIvPgogICAgPC9yYWRpYWxHcmFkaWVudD4KICA8L2RlZnM+CiAgPHRleHQgeD0iOTAiIHk9IjEyNSIgZm9udC1mYW1pbHk9IkFyaWFsIEJsYWNrLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwOCIgZm9udC13ZWlnaHQ9IjkwMCIgZmlsbD0iI2ZmZDE2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QjwvdGV4dD4KPC9zdmc+">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+<!-- ── BOTTOM NAV ── -->
+<div class="bottom-nav">
+  <button class="nav-item active" data-page="plan" onclick="showPage('plan',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>Plan</button>
+  <button class="nav-item" data-page="nutrition" onclick="showPage('nutrition',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></span>Essen</button>
+  <button class="nav-item" data-page="feedback" onclick="showPage('feedback',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>Check</button>
+  <button class="nav-item" data-page="training" onclick="showPage('training',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></span>Training</button>
+  <button class="nav-item" data-page="goals" onclick="showPage('goals',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Ziele</button>
+  <button class="nav-item" data-page="stats" onclick="showPage('stats',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Stats</button>
+  <button class="nav-item" data-page="ai" onclick="showPage('ai',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.94 14.06A2 2 0 0 0 8.5 12.63l-5.4-1.4a.4.4 0 0 1 0-.78l5.4-1.4A2 2 0 0 0 9.94 7.6l1.4-5.4a.4.4 0 0 1 .78 0l1.4 5.4a2 2 0 0 0 1.44 1.44l5.4 1.4a.4.4 0 0 1 0 .78l-5.4 1.4a2 2 0 0 0-1.44 1.44l-1.4 5.4a.4.4 0 0 1-.78 0z"/></svg></span>KI</button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE: PLAN
+════════════════════════════════════════════ -->
+<div class="page active" id="page-plan">
+  <div class="install-banner" id="installBanner">
+    <div class="ib-text"><strong class="ib-title">Als App installieren</strong>Tippe unten auf <strong>Teilen</strong> → dann <strong>„Zum Home-Bildschirm".</strong></div>
+    <span class="install-close" onclick="dismissInstall()">✕</span>
+  </div>
+
+  <!-- ── TAGESREADOUT ── -->
+  <div class="readout">
+    <div class="readout-top">
+      <span class="eyebrow">Tagesplan</span>
+      <span class="today"><span class="today-dot"></span>heute · <span id="planDate" class="mono"></span></span>
+    </div>
+    <div class="plan-clock-row">
+      <div class="clock-time" id="clockTime"></div>
+      <div class="plan-next">
+        <div class="clock-next-label">Nächster Block</div>
+        <div class="clock-next" id="clockNext">–</div>
+        <div class="clock-countdown mono" id="clockCountdown"></div>
+      </div>
+    </div>
+    <div class="readout-rule"></div>
+    <div class="rsec-head"><span class="rsec-label">Tagesfortschritt</span><span class="mono rsec-val"><span id="planDoneNum">0</span> / <span id="planTotalNum">0</span> erledigt</span></div>
+    <div class="gauge"><div class="gauge-fill" id="planProgressBar" style="width:0%;background:var(--ok)"></div></div>
+    <div id="examCountdown" style="display:none;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);"></div>
+  </div>
+
+  <div class="mode-selector">
+    <div class="mode-btn" data-mode="baustelle" onclick="setMode('baustelle')"><span class="mode-dot"></span><div class="mode-label">Baustelle</div></div>
+    <div class="mode-btn active" data-mode="schule" onclick="setMode('schule')"><span class="mode-dot"></span><div class="mode-label">Schule</div></div>
+    <div class="mode-btn" data-mode="lehrbauhof" onclick="setMode('lehrbauhof')"><span class="mode-dot"></span><div class="mode-label">Lehrbauhof</div></div>
+  </div>
+
+  <div class="day-selector" id="daySelector"></div>
+
+  <div class="sleep-warning" id="sleepWarning">Morgen früh aufstehen — spätestens 22:30 Uhr schlafen. Schlaf = Muskelaufbau.</div>
+
+  <div id="kcalBanner"></div>
+  <div id="planUndoBanner"></div>
+
+  <!-- Plan edit toggle -->
+  <div class="plan-edit-toggle">
+    <button class="toggle-btn" id="planEditBtn" onclick="togglePlanEdit()">Bearbeiten</button>
+    <button onclick="resetPlanDay()" style="background:none;border:1px solid var(--rule);border-radius:8px;padding:7px 11px;font-size:13px;color:var(--muted);cursor:pointer;" title="Tag zurücksetzen" aria-label="Tag zurücksetzen">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+
+  <!-- Block edit modal -->
+  <div class="block-modal-overlay" id="blockModal">
+    <div class="block-modal">
+      <div class="block-modal-header">
+        <div class="block-modal-title" id="blockModalTitle">Block bearbeiten</div>
+        <button class="block-modal-close" onclick="closeBlockModal()">✕</button>
+      </div>
+      <div class="block-modal-label">Uhrzeit</div>
+      <input type="time" id="bm-time">
+      <div class="block-modal-label">Titel</div>
+      <input type="text" id="bm-title" placeholder="z.B. Training">
+      <div class="block-modal-label">Beschreibung</div>
+      <input type="text" id="bm-desc" placeholder="Optional…">
+      <div class="block-modal-label">Kategorie (Farbe)</div>
+      <select id="bm-cat">
+        <option value="morning">Morgen</option>
+        <option value="meal">Essen</option>
+        <option value="work">Arbeit / Schule</option>
+        <option value="sport">Sport</option>
+        <option value="habit">Habit</option>
+        <option value="learn">Lernen</option>
+        <option value="free">Freizeit</option>
+        <option value="sleep">Schlafen</option>
+      </select>
+      <div class="block-modal-actions">
+        <button class="bm-save" onclick="saveBlockEdit()">Speichern</button>
+        <button class="bm-del" id="bmDelBtn" onclick="deleteBlock()" aria-label="Block löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+      <div style="margin-top:8px;">
+        <button class="bm-add" onclick="addBlockBelow()">+ Block darunter einfügen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:24px;">Ausbildungswochen</div>
+  <div id="planWeekGrid"></div>
+  <div class="version-badge">v3.0 · Baran's Planner</div>
+</div>
+
+<!-- PAGE: NUTRITION -->
+<div class="page" id="page-nutrition">
+  <!-- ── TAGESREADOUT ── -->
+  <div class="readout">
+    <div class="readout-top">
+      <span class="eyebrow">Ernährung</span>
+      <span class="today"><span class="today-dot"></span>heute · <span id="todayDate" class="mono"></span></span>
+    </div>
+    <div class="readout-hero">
+      <span class="mono" id="ringKcal">0</span>
+      <span class="readout-goal mono">/ <span id="goalKcal">3400</span> kcal</span>
+    </div>
+    <div class="gauge-row">
+      <div class="gauge"><div class="gauge-fill" id="barKcal" style="width:0%;background:var(--accent)"></div></div>
+      <span class="mono gauge-pct" id="statKcal">0%</span>
+    </div>
+    <div class="readout-phase" id="nutritionPhaseLabel">Massephase Tracker</div>
+    <div class="readout-rule"></div>
+    <div class="readout-sec">
+      <div class="rsec">
+        <div class="rsec-head"><span class="rsec-label">Protein</span><span class="mono rsec-val" id="statProtein">0g / 170g</span></div>
+        <div class="gauge sm"><div class="gauge-fill" id="barProtein" style="width:0%;background:var(--ok)"></div></div>
+      </div>
+      <div class="rsec">
+        <div class="rsec-head"><span class="rsec-label">Wasser</span><span class="mono rsec-val" id="statWater">0 / <span id="goalWater">3.5</span>L</span></div>
+        <div class="gauge sm"><div class="gauge-fill" id="barWater" style="width:0%;background:var(--info)"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase switcher (segmented) -->
+  <div class="segmented" style="margin-bottom:18px;">
+    <button class="phase-btn active" data-phase="masse" onclick="requestPhaseChange('masse',this)">Masse</button>
+    <button class="phase-btn" data-phase="maintain" onclick="requestPhaseChange('maintain',this)">Maintain</button>
+    <button class="phase-btn" data-phase="cut" onclick="requestPhaseChange('cut',this)">Cut</button>
+  </div>
+  <!-- Phase confirm modal -->
+  <div id="phaseModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--surface);border-radius:16px;padding:20px;width:100%;max-width:400px;border:1px solid var(--border);">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);margin-bottom:10px;">Phase wechseln?</div>
+      <div id="phaseModalText" style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px;"></div>
+      <div id="aiPhaseLoading" style="display:none;text-align:center;padding:8px;font-size:12px;color:var(--muted);">
+        <span class="loading-dot"></span><span class="loading-dot" style="animation-delay:0.2s"></span><span class="loading-dot" style="animation-delay:0.4s"></span> KI analysiert...
+      </div>
+      <div id="aiPhaseResponse" style="background:var(--surface2);border-radius:10px;padding:12px;font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:12px;display:none;"></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="confirmPhaseChange()" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:12px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;color:var(--bg);cursor:pointer;">Ja, wechseln</button>
+        <button onclick="cancelPhaseChange()" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px;font-size:12px;color:var(--muted);cursor:pointer;">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+  <!-- AI meal suggestion banner -->
+  <div id="mealSuggestionBanner" style="display:none;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div class="eyebrow" style="color:var(--info);margin-bottom:6px;">KI Empfehlung</div>
+    <div id="mealSuggestionText" style="font-size:12px;color:var(--muted);line-height:1.5;"></div>
+    <button onclick="document.getElementById('mealSuggestionBanner').style.display='none'" style="margin-top:8px;font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;">Ausblenden</button>
+  </div>
+
+  <!-- Water quick-add -->
+  <div class="water-row">
+    <button onclick="addWater(0.25)" class="water-btn">+0,25 L</button>
+    <button onclick="addWater(0.5)" class="water-btn">+0,5 L</button>
+    <button onclick="addWater(1)" class="water-btn wide">+1,0 L</button>
+    <button onclick="resetWater()" class="water-btn reset" aria-label="Wasser zurücksetzen">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+
+  <!-- Mode note -->
+  <div class="mode-note" id="nutritionModeNote"><strong>Heute Schultag:</strong> Ziel 3.400 kcal. Kein Extra-Shake nötig.</div>
+
+  <!-- Category filter (segmented) -->
+  <div class="cat-tabs" id="catTabs">
+    <div class="cat-tab active" data-cat="all" onclick="filterCat('all',this)">Alle</div>
+    <div class="cat-tab" data-cat="fruehstueck" onclick="filterCat('fruehstueck',this)">Frühstück</div>
+    <div class="cat-tab" data-cat="mittag" onclick="filterCat('mittag',this)">Mittag</div>
+    <div class="cat-tab" data-cat="snack" onclick="filterCat('snack',this)">Snack</div>
+    <div class="cat-tab" data-cat="abend" onclick="filterCat('abend',this)">Abend</div>
+    <div class="cat-tab" data-cat="shake" onclick="filterCat('shake',this)">Shake</div>
+    <div class="cat-tab" data-cat="eigene" onclick="filterCat('eigene',this)">Eigene</div>
+  </div>
+
+  <!-- Meal grid -->
+  <div class="meal-grid" id="mealGrid"></div>
+
+  <!-- Custom entry -->
+  <div class="custom-add">
+    <input type="text" id="customName" placeholder="Eigene Mahlzeit…" maxlength="40">
+    <input type="number" id="customKcal" placeholder="kcal" class="mono" style="width:60px;text-align:right;" min="0" max="3000">
+    <input type="number" id="customProtein" placeholder="g P" class="mono" style="width:50px;text-align:right;" min="0" max="300">
+    <button onclick="addCustom()" class="custom-add-btn">Eintragen</button>
+  </div>
+
+  <!-- Daily log -->
+  <div class="section-title">Heute gegessen</div>
+  <div class="log-section" id="logSection"></div>
+  <button class="reset-btn" onclick="resetDay()">Tag zurücksetzen</button>
+</div>
+
+<!-- ════════════════════════════════════════════
+     PAGE: FEEDBACK
+════════════════════════════════════════════ -->
+
+
+
+<!-- PAGE: FEEDBACK -->
+<div class="page" id="page-feedback">
+  <div class="header">
+    <div class="header-label">Tagesabschluss</div>
+    <div class="header-title">Wie lief<br><span>heute?</span></div>
+  </div>
+  <div class="feedback-date" id="feedbackDate"></div>
+  <div class="score-card">
+    <div class="score-num" id="scoreNum">–</div>
+    <div class="score-label">Tages-Score</div>
+    <div class="score-bar"><div class="score-bar-fill" id="scoreBarFill" style="width:0%;background:var(--accent)"></div></div>
+  </div>
+  <div class="section-title">Deine Woche</div>
+  <div class="heatmap" id="heatmap"></div>
+  <div style="display:flex;align-items:center;gap:8px;margin:24px 0 10px;">
+    <div class="section-title" style="margin:0;flex:1;">Was hast du heute gemacht?</div>
+    <button id="habitEditBtn" onclick="toggleHabitEdit()" class="toggle-btn" style="padding:6px 12px;font-size:12px;">Bearbeiten</button>
+  </div>
+  <div class="habit-card" id="habitCard"></div>
+  <!-- Habit edit modal -->
+  <div class="block-modal-overlay" id="habitModal">
+    <div class="block-modal">
+      <div class="block-modal-header">
+        <div class="block-modal-title" id="habitModalTitle">Habit bearbeiten</div>
+        <button class="block-modal-close" onclick="closeHabitModal()">✕</button>
+      </div>
+      <div class="block-modal-label">Name</div>
+      <input type="text" id="hm-name" placeholder="z.B. Lesen">
+      <div class="block-modal-label">Frage / Beschreibung</div>
+      <input type="text" id="hm-desc" placeholder="z.B. 20 Min gelesen?">
+      <label style="display:flex;align-items:center;gap:8px;margin:6px 0 12px;font-size:13px;color:var(--muted);cursor:pointer;">
+        <input type="checkbox" id="hm-mandatory" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">Pflicht (nicht verhandelbar)
+      </label>
+      <div class="block-modal-actions">
+        <button class="bm-save" onclick="saveHabitModal()">Speichern</button>
+        <button class="bm-del" id="hmDelBtn" onclick="deleteHabit()" aria-label="Habit löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <!-- AI feedback -->
+  <div class="section-title">Feedback</div>
+  <div id="aiFeedback"></div>
+  <button class="save-btn" onclick="saveDay()">Tag speichern</button>
+  <button onclick="generateDailyFeedback()" style="width:100%;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:14px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;margin-top:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tagesfeedback vom Coach holen</button>
+</div>
+
+
+<!-- PAGE: TRAINING -->
+<div class="page" id="page-training">
+  <div class="header">
+    <div class="header-label">Boxen/Kickboxen – Phase 1</div>
+    <div class="header-title">Dein<br><span>Kampfplan</span></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center;">
+    <div style="flex:1;font-size:13px;color:var(--muted);">Tippe auf eine Übung zum Bearbeiten</div>
+    <button id="editToggleBtn" onclick="toggleEditMode()" style="background:none;border:1px solid var(--rule);border-radius:8px;padding:8px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;">Bearbeiten</button>
+    <button onclick="resetTraining()" style="background:none;border:1px solid var(--rule);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--muted);cursor:pointer;" title="Zurücksetzen" aria-label="Zurücksetzen"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+  </div>
+  <div class="mode-note"><strong>Schlagkraft & Explosivität:</strong> Mo Push · Di Skill · Mi Beine+Core · Fr Pull · Sa Skill (lang) · Do+So Ruhe</div>
+  <div class="section-title" id="planTitle">Phase 1 · 88,4 kg · 1,95 m · Mo / Di / Mi / Fr / Sa</div>
+  <div style="display:flex;gap:6px;margin-bottom:14px;align-items:center;">
+    <div style="font-size:13px;color:var(--muted);flex:1;">Woche wählen zum Loggen:</div>
+    <div style="display:flex;gap:6px;">
+      <button class="week-log-btn active" data-week="current" onclick="setLogWeek('current',this)" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:999px;padding:6px 12px;font-size:12px;font-family:'IBM Plex Sans',sans-serif;font-weight:500;color:var(--ink);cursor:pointer;">Diese Woche</button>
+      <button class="week-log-btn" data-week="last" onclick="setLogWeek('last',this)" style="background:none;border:1px solid var(--rule);border-radius:999px;padding:6px 12px;font-size:12px;font-family:'IBM Plex Sans',sans-serif;font-weight:500;color:var(--muted);cursor:pointer;">Letzte Woche</button>
+    </div>
+  </div>
+  <div id="progressionHint" style="display:none;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+    <div class="eyebrow" style="color:var(--ok);margin-bottom:6px;">Progression diese Woche</div>
+    <div id="progressionHintText" style="font-size:14px;color:var(--muted);line-height:1.5;"></div>
+  </div>
+  <div id="exerciseList"></div>
+  <!-- Exercise log modal -->
+  <div id="logModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;justify-content:center;">
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:480px;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);" id="logModalTitle">Training loggen</div>
+        <button onclick="closeLogModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;">✕</button>
+      </div>
+      <div id="logModalLastWeek" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
+      <div id="setsLogger" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:280px;overflow-y:auto;"></div>
+      <button onclick="addLogSet()" style="width:100%;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:9px;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:12px;">+ Satz hinzufügen</button>
+      <input id="logNote" placeholder="Notiz (optional)..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;margin-bottom:12px;">
+      <button onclick="saveExerciseLog()" style="width:100%;background:var(--accent);border:none;border-radius:8px;padding:14px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;color:var(--bg);cursor:pointer;">Speichern</button>
+    </div>
+  </div>
+  <!-- Add exercise -->
+  <div id="addExercisePanel" style="margin-top:4px;display:none;">
+    <button onclick="showAddExercise()" id="addExBtn" style="width:100%;background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:13px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;">+ Neue Übung hinzufügen</button>
+    <div id="addExForm" style="display:none;background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;padding:14px;margin-top:6px;">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px;">Neue Übung</div>
+      <input id="newExName" placeholder="Name (z.B. Pike Push-ups)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;margin-bottom:8px;outline:none;">
+      <input id="newExDetail" placeholder="Muskelgruppe (z.B. Schultern)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;margin-bottom:8px;outline:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Sätze</div>
+          <input id="newExSets" type="number" value="3" min="1" max="10" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Wiederholungen</div>
+          <input id="newExReps" placeholder="z.B. 10-12" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;text-align:center;">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="addExercise()" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:11px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;color:var(--bg);cursor:pointer;">Hinzufügen</button>
+        <button onclick="hideAddExercise()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--muted);cursor:pointer;">Abbrechen</button>
+      </div>
+    </div>
+  </div>
+  <!-- Edit modal -->
+  <div id="editModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:flex-end;justify-content:center;">
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:480px;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);">Übung bearbeiten</div>
+        <button onclick="closeEditModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;font-size:13px;">✕</button>
+      </div>
+      <input id="modalName" placeholder="Übungsname" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;margin-bottom:8px;outline:none;">
+      <input id="modalDetail" placeholder="Muskelgruppe" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;margin-bottom:12px;outline:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;">Sätze</div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button onclick="adjustSets(-1)" style="width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:18px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;">−</button>
+            <div id="modalSetsDisplay" style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;color:var(--text);flex:1;text-align:center;"></div>
+            <button onclick="adjustSets(1)" style="width:36px;height:36px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:18px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;">+</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:0.1em;text-transform:uppercase;">Wiederholungen</div>
+          <input id="modalReps" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:700;outline:none;text-align:center;height:36px;">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="saveEditModal()" style="flex:1;background:var(--accent);border:none;border-radius:8px;padding:12px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;color:var(--bg);cursor:pointer;">Speichern</button>
+        <button onclick="deleteExercise()" style="background:none;border:1px solid var(--rule);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--over);cursor:pointer;display:flex;align-items:center;" aria-label="Übung löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+      </div>
+    </div>
+  </div>
+  <div class="section-title">Coach-Regeln</div>
+  <div class="tip-card"><strong>Explosiv-Sätze immer ZUERST</strong> — solange du frisch bist. Qualität & Speed vor Wiederholungszahl.</div>
+  <div class="tip-card"><strong>1-kg-Hanteln nur fürs Tempo-Shadow</strong> — niemals voll durchschlagen mit Gewicht. Schützt Ellbogen & Schultern.</div>
+  <div class="tip-card"><strong>Pausen aktiv:</strong> In Runden-Pausen nicht setzen — locker gehen, Hände oben.</div>
+  <div class="tip-card"><strong>Zigaretten-Deal:</strong> Keine Kippe 60 Min vor und 60 Min nach dem Training.</div>
+  <div class="tip-card"><strong>Ziel Woche 4:</strong> 5–6 Runden × 3 Min Schatten ohne Einbruch — aus „Kondition ist kacke" wird „Runde 5 noch was im Tank".</div>
+</div>
+
+<!-- PAGE: GOALS -->
+<div class="page" id="page-goals">
+  <div class="header">
+    <div class="header-label">Deine Ziele</div>
+    <div class="header-title">Fortschritt<br><span>tracken</span></div>
+  </div>
+  <div id="calendarBanner" style="display:none;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+    <div class="eyebrow" style="margin-bottom:5px;">Kalender-Hinweis</div>
+    <div id="calendarBannerText" style="font-size:14px;color:var(--muted);line-height:1.5;"></div>
+  </div>
+  <div id="notifBanner" style="background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;gap:10px;align-items:center;">
+    <div style="flex:1;font-size:14px;color:var(--muted);line-height:1.5;"><strong style="color:var(--ink);display:block;margin-bottom:2px;font-weight:600;">Benachrichtigungen</strong><span id="notifStatus">Noch nicht aktiviert</span></div>
+    <button onclick="requestNotifications()" id="notifBtn" style="background:none;border:1px solid var(--rule-strong);border-radius:8px;padding:8px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--info);cursor:pointer;white-space:nowrap;">Aktivieren</button>
+  </div>
+  <div id="notifSettingsContainer" style="display:none;margin-bottom:16px;"></div>
+  <div class="section-title">Deine Ziele</div>
+  <div id="goalsList"></div>
+  <button onclick="openAddGoal()" style="width:100%;background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:13px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:16px;">+ Neues Ziel hinzufügen</button>
+  <div id="addGoalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;justify-content:center;">
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:480px;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);">Neues Ziel</div>
+        <button onclick="closeAddGoal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.08em;">Kategorie</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;">
+        <button class="goal-cat-btn active" data-cat="health" onclick="selectGoalCat('health',this)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:8px;padding:11px 4px 9px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg><span style="font-size:11px;color:var(--muted);">Gesundheit</span></button>
+        <button class="goal-cat-btn" data-cat="money" onclick="selectGoalCat('money',this)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:8px;padding:11px 4px 9px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V5a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-2"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-3"/><circle cx="17" cy="14" r="1"/></svg><span style="font-size:11px;color:var(--muted);">Finanzen</span></button>
+        <button class="goal-cat-btn" data-cat="skill" onclick="selectGoalCat('skill',this)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:8px;padding:11px 4px 9px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg><span style="font-size:11px;color:var(--muted);">Skills</span></button>
+        <button class="goal-cat-btn" data-cat="life" onclick="selectGoalCat('life',this)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:8px;padding:11px 4px 9px;cursor:pointer;text-align:center;display:flex;flex-direction:column;align-items:center;gap:5px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 2 14 8.5 21 9l-5 4.5L17.5 21 11.5 17 5.5 21 7 13.5 2 9l7-.5z"/></svg><span style="font-size:11px;color:var(--muted);">Leben</span></button>
+      </div>
+      <input id="goalTitle" placeholder="Titel (z.B. Führerschein bestehen)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:13px;outline:none;margin-bottom:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Aktueller Wert</div>
+          <input id="goalCurrent" type="number" placeholder="0" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;">
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:4px;">Zielwert</div>
+          <input id="goalTarget" type="number" placeholder="100" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'Bricolage Grotesque',sans-serif;font-size:14px;font-weight:700;outline:none;text-align:center;">
+        </div>
+      </div>
+      <input id="goalUnit" placeholder="Einheit (z.B. %, EUR, kg)" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;margin-bottom:8px;">
+      <input id="goalDeadline" type="date" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;margin-bottom:12px;">
+      <button onclick="saveGoal()" style="width:100%;background:var(--accent);border:none;border-radius:8px;padding:14px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;color:var(--bg);cursor:pointer;">Ziel speichern</button>
+    </div>
+  </div>
+  <div class="section-title" style="margin-top:8px;">Woche abschließen</div>
+  <button onclick="startWeeklyReview()" class="review-btn">
+    <span style="color:var(--info);display:flex;flex-shrink:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/></svg></span>
+    <div><div style="font-size:15px;font-weight:600;color:var(--ink);">Wochen-Review starten</div><div style="font-size:13px;color:var(--muted);margin-top:2px;">KI analysiert deine Woche mit dir</div></div>
+  </button>
+  <div class="section-title">Kommende Feiertage & Events</div>
+  <div id="holidayList"></div>
+</div>
+
+<!-- PAGE: AI CHAT -->
+<div class="page" id="page-ai">
+  <div class="ai-chat-header">
+    <div>
+      <div class="eyebrow" style="margin-bottom:4px;">KI Assistent</div>
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:700;letter-spacing:-0.01em;">Dein <span style="color:var(--accent);">Coach</span></div>
+    </div>
+    <div class="ai-status-dot" id="aiStatusDot" title="Online"></div>
+  </div>
+  <div id="apiKeyBanner" class="api-key-banner">
+    <div style="flex-shrink:0;color:var(--ink-muted);display:flex;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></div>
+    <div style="flex:1;">
+      <div style="font-size:14px;font-weight:600;color:var(--ink);margin-bottom:4px;">API Key einmalig eingeben</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px;line-height:1.5;">Hol deinen Key auf <strong style="color:var(--ink);">console.anthropic.com</strong> → API Keys</div>
+      <div style="display:flex;gap:8px;">
+        <input id="apiKeyInput" type="password" placeholder="sk-ant-api03-..." class="api-key-input">
+        <button onclick="saveApiKey()" class="api-key-save-btn">OK →</button>
+      </div>
+    </div>
+  </div>
+  <!-- Kontext-Chip: zeigt & schaltet den aktiven Chat-Kontext -->
+  <div class="chat-context-row">
+    <span class="chat-context-label">Kontext</span>
+    <div class="chat-context-chips" id="chatContextChip"></div>
+  </div>
+  <div class="quick-prompts-wrap">
+    <div class="quick-prompts-scroll" id="quickPrompts"></div>
+  </div>
+  <details style="margin:0 0 10px;">
+    <summary style="cursor:pointer;font-size:13px;color:var(--muted);padding:6px 0;list-style:none;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>Gedächtnis &amp; Obsidian</summary>
+    <div style="background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px;margin-top:6px;">
+      <div id="memStatus" style="font-size:12px;color:var(--muted);margin-bottom:10px;">…</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button onclick="exportToObsidian()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Backup für Obsidian</button>
+        <label style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Notiz / Backup laden<input type="file" accept=".md,.txt,.json" onchange="importFromObsidian(this)" style="display:none;"></label>
+      </div>
+      <div id="memNote" style="font-size:12px;color:var(--ok);margin-top:8px;min-height:14px;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;">Aufm iPhone manuell: „Backup" teilt eine <code>.md</code> in deinen osiris-Vault (z.B. <code>99 System/planner/</code>). „Laden" liest eine Notiz, die der Coach kennen soll — iCloud kann die App nicht von selbst lesen.</div>
+      <div style="border-top:1px solid var(--rule);margin-top:12px;padding-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>Auto-Sync (Geräte + Coach)</div>
+        <div id="syncStatus" style="font-size:12px;color:var(--muted);margin-bottom:8px;">nicht eingerichtet</div>
+        <input id="syncUrlInput" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Supabase Function URL (…/functions/v1/baro-sync)" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 10px;font-size:13px;color:var(--ink);margin-bottom:6px;">
+        <input id="syncSecretInput" type="password" autocomplete="off" placeholder="Sync-Secret" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 10px;font-size:13px;color:var(--ink);margin-bottom:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button onclick="saveSyncConfig()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;">Speichern</button>
+          <button onclick="pullCloud()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>Jetzt holen</button>
+          <button onclick="forcePush()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:4px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>Jetzt senden</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;">Trägst du auf iPhone <strong>und</strong> iPad dieselbe URL + dasselbe Secret ein, syncen beide automatisch über die Cloud. Der Coach liest denselben Stand im Vault.</div>
+      </div>
+      <div style="border-top:1px solid var(--rule);margin-top:12px;padding-top:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px;"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>Chat-Proxy &amp; Push (optional)</div>
+        <input id="chatProxyInput" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Chat-Proxy URL (…/functions/v1/baro-chat)" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 10px;font-size:13px;color:var(--ink);margin-bottom:6px;">
+        <input id="vapidKeyInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="VAPID Public Key (für Push)" style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 10px;font-size:13px;color:var(--ink);margin-bottom:8px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button onclick="saveProxyConfig()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;">Speichern</button>
+          <button onclick="enablePush()" style="background:var(--surface2);border:1px solid var(--rule-strong);border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;">Push aktivieren</button>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.5;">Mit Chat-Proxy läuft der Coach über deine Supabase-Function – der API-Key bleibt auf dem Server. Push = echte Erinnerungen auch bei geschlossener App (iOS 16.4+, App muss auf dem Home-Bildschirm installiert sein). Setup: <code>SUPABASE-SETUP.md</code>.</div>
+      </div>
+    </div>
+  </details>
+  <div id="aiMessages" class="ai-messages-wrap"></div>
+  <div id="aiLoading" class="ai-loading-wrap">
+    <div class="ai-typing-bubble">
+      <span class="loading-dot"></span>
+      <span class="loading-dot" style="animation-delay:0.15s"></span>
+      <span class="loading-dot" style="animation-delay:0.3s"></span>
+    </div>
+  </div>
+  <div class="ai-input-bar">
+    <input id="aiInput" type="text" placeholder="Schreib deinem Coach..." class="ai-input-field" onkeydown="if(event.key==='Enter')sendToAI()">
+    <button onclick="sendToAI()" class="ai-send-btn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+    </button>
+  </div>
+  <button onclick="clearChat()" class="ai-clear-btn">— Chat leeren —</button>
+</div>
+
+<!-- PAGE: STATS -->
+<div class="page" id="page-stats">
+  <div class="header">
+    <div class="header-label">Deine Entwicklung</div>
+    <div class="header-title">Stats &amp;<br><span>Fortschritt</span></div>
+  </div>
+
+  <!-- ── GEWICHT (Kernmetrik) ── -->
+  <div class="readout">
+    <div class="readout-top">
+      <span class="eyebrow">Gewicht</span>
+      <span class="today"><span class="today-dot"></span><span id="weightPhaseLabel">Massephase</span></span>
+    </div>
+    <div class="readout-hero">
+      <span class="mono" id="weightNow" style="font-size:42px;font-weight:500;line-height:1;color:var(--ink);">–</span>
+      <span class="readout-goal mono">kg</span>
+    </div>
+    <div id="weightTrend" style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;"></div>
+    <svg id="weightSpark" viewBox="0 0 300 60" preserveAspectRatio="none" style="width:100%;height:60px;margin-top:10px;display:none;"></svg>
+    <div class="readout-rule"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="number" inputmode="decimal" step="0.1" min="40" max="250" id="weightInput" placeholder="heute gewogen…" class="mono" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;color:var(--ink);font-size:15px;outline:none;text-align:center;" onkeydown="if(event.key==='Enter')submitWeight()">
+      <button onclick="submitWeight()" class="custom-add-btn" style="padding:11px 16px;">Eintragen</button>
+    </div>
+  </div>
+
+  <div class="stats-big-grid">
+    <div class="stats-big-card stagger-in" style="animation-delay:0s">
+      <div class="sbc-icon-wrap" style="background:rgba(210,106,78,0.14);color:var(--over);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></div>
+      <div class="sbc-num" id="stat-training-num">–</div>
+      <div class="sbc-label">Trainings</div>
+      <div class="sbc-sub">diese Woche</div>
+    </div>
+    <div class="stats-big-card stagger-in" style="animation-delay:0.06s">
+      <div class="sbc-icon-wrap" style="background:rgba(224,169,59,0.14);color:var(--accent);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+      <div class="sbc-num" id="stat-kcal-num">–</div>
+      <div class="sbc-label">kcal</div>
+      <div class="sbc-sub">heute</div>
+    </div>
+    <div class="stats-big-card stagger-in" style="animation-delay:0.12s">
+      <div class="sbc-icon-wrap" style="background:rgba(123,174,112,0.14);color:var(--ok);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+      <div class="sbc-num" id="stat-habits-num">–</div>
+      <div class="sbc-label">Habits</div>
+      <div class="sbc-sub">heute</div>
+    </div>
+  </div>
+
+  <div class="water-stat-card">
+    <div>
+      <div class="eyebrow" style="margin-bottom:4px;">Wasser heute</div>
+      <div class="mono" style="font-size:32px;font-weight:500;color:var(--info);line-height:1;" id="waterStatVal">0L</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="waterStatGoal">von 3.5L Ziel</div>
+    </div>
+    <div style="flex:1;padding-left:20px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;">
+        <div id="waterStatBar" style="height:100%;border-radius:999px;background:var(--info);transition:width var(--t-fill) var(--ease-out);width:0%;"></div>
+      </div>
+      <div class="mono" style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+        <span>0L</span><span id="waterStatGoalRight">3.5L</span>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="section-title">Kalorien – letzte 14 Tage</div>
+  <div id="kcalChart"></div>
+
+  <div class="section-title">Wochen-Score</div>
+  <div class="stats-heatmap" id="statsHeatmap"></div>
+
+  <div class="section-title">Training Progression</div>
+  <div id="statsTrainingList"></div>
+
+  <div class="section-title">Ausbildungswochen</div>
+  <div id="statsWeekGrid"></div>
+
+</div>
+<!-- Confirm-Sheet (ersetzt window.confirm – in iOS-Standalone-PWAs unzuverlässig) -->
+<div class="block-modal-overlay" id="confirmSheet">
+  <div class="block-modal">
+    <div id="confirmSheetMsg" style="font-size:15px;color:var(--ink);line-height:1.5;margin-bottom:16px;"></div>
+    <div style="display:flex;gap:8px;">
+      <button id="confirmSheetOk" onclick="resolveConfirm(true)" style="flex:1;background:none;border:1px solid var(--over);border-radius:8px;padding:12px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;color:var(--over);cursor:pointer;">Ja</button>
+      <button onclick="resolveConfirm(false)" style="flex:1;background:var(--surface2);border:1px solid var(--rule);border-radius:8px;padding:12px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;color:var(--muted);cursor:pointer;">Abbrechen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Zahlen-Sheet (ersetzt window.prompt, z.B. Ziel aktualisieren) -->
+<div class="block-modal-overlay" id="numberSheet">
+  <div class="block-modal">
+    <div class="block-modal-header">
+      <div class="block-modal-title" id="numberSheetTitle">Wert ändern</div>
+      <button class="block-modal-close" onclick="resolveNumber(false)">✕</button>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;">
+      <input type="number" inputmode="decimal" step="any" id="numberSheetInput" class="mono" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--ink);font-size:20px;text-align:center;outline:none;" onkeydown="if(event.key==='Enter')resolveNumber(true)">
+      <span id="numberSheetUnit" style="font-size:14px;color:var(--muted);min-width:32px;"></span>
+    </div>
+    <button class="bm-save" style="width:100%;" onclick="resolveNumber(true)">Speichern</button>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script src="app.js"></script>
+</body>
+</html>
