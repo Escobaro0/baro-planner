@@ -155,6 +155,9 @@ function getKcalInfo(){
 // ═══════════════════════════════════════════
 const MEALS = [
   // Frühstück
+  {id:'bulkFruehstueck',emoji:'🍳',name:'Bulk-Frühstück (4 Eier + 2 Toast m. Butter/Honig + O-Saft)',kcal:800,protein:30,cat:'fruehstueck'},
+  {id:'toastButterHonig',emoji:'🍞',name:'Toast + Butter + Honig (1 Scheibe)',kcal:160,protein:3,cat:'fruehstueck'},
+  {id:'osaft',emoji:'🍊',name:'O-Saft (1 Glas)',kcal:110,protein:1,cat:'fruehstueck'},
   {id:'ei3',emoji:'🥚',name:'3 Eier (gebraten)',kcal:210,protein:19,cat:'fruehstueck'},
   {id:'ei4',emoji:'🥚',name:'4 Eier (gekocht)',kcal:280,protein:25,cat:'fruehstueck'},
   {id:'tortilla',emoji:'🫓',name:'Protein Tortilla (1 St.)',kcal:150,protein:12,cat:'fruehstueck'},
@@ -162,6 +165,8 @@ const MEALS = [
   {id:'avocado',emoji:'🥑',name:'Avocado (½)',kcal:120,protein:2,cat:'fruehstueck'},
   {id:'tomaten',emoji:'🍅',name:'Tomaten + Gurke',kcal:35,protein:2,cat:'fruehstueck'},
   // Mittag
+  {id:'tavukSis',emoji:'🍗',name:'Tavuk Şiş Meal Prep (250g Schenkel + 120g Reis + Öl)',kcal:1050,protein:50,cat:'mittag'},
+  {id:'olivenoel',emoji:'🫒',name:'Olivenöl (1 EL)',kcal:90,protein:0,cat:'mittag'},
   {id:'haehnchen',emoji:'🍗',name:'Hähnchenbrust (200g)',kcal:220,protein:46,cat:'mittag'},
   {id:'rind',emoji:'🥩',name:'Rindfleisch (200g)',kcal:300,protein:44,cat:'mittag'},
   {id:'fisch',emoji:'🐟',name:'Fisch (200g)',kcal:200,protein:42,cat:'mittag'},
@@ -170,16 +175,22 @@ const MEALS = [
   {id:'bulgur',emoji:'🌾',name:'Bulgur (200g gek.)',kcal:220,protein:8,cat:'mittag'},
   {id:'kartoffeln',emoji:'🥔',name:'Kartoffeln (300g)',kcal:240,protein:6,cat:'mittag'},
   // Snacks
+  {id:'bulkSnack',emoji:'🫙',name:'Bulk-Snack (250g Joghurt 10% + Honig + Walnüsse)',kcal:500,protein:18,cat:'snack'},
+  {id:'datteln',emoji:'🌴',name:'Datteln (3 St.)',kcal:150,protein:1,cat:'snack'},
+  {id:'honig',emoji:'🍯',name:'Honig (1 EL)',kcal:65,protein:0,cat:'snack'},
   {id:'ceviz',emoji:'🌰',name:'Ceviz / Walnüsse (30g)',kcal:200,protein:5,cat:'snack'},
   {id:'elma',emoji:'🍎',name:'Elma / Apfel',kcal:80,protein:0,cat:'snack'},
   {id:'muz',emoji:'🍌',name:'Muz / Banane',kcal:100,protein:1,cat:'snack'},
   {id:'joghurt',emoji:'🫙',name:'Griech. Joghurt (200g)',kcal:130,protein:20,cat:'snack'},
   {id:'erdnuss',emoji:'🥜',name:'Erdnussbutter (30g)',kcal:180,protein:7,cat:'snack'},
   // Abend
+  {id:'kiymaliMakarna',emoji:'🍝',name:'Kıymalı Makarna (200g Hack 20% + 125g Makarna + Käse)',kcal:950,protein:45,cat:'abend'},
   {id:'joghurt2',emoji:'🫙',name:'Griech. Joghurt (300g)',kcal:195,protein:30,cat:'abend'},
   {id:'obst_mix',emoji:'🍓',name:'Obst Mix (150g)',kcal:90,protein:1,cat:'abend'},
   {id:'gemuese',emoji:'🥗',name:'Gemüse Salat',kcal:60,protein:3,cat:'abend'},
   // Shakes
+  {id:'bulkShake',emoji:'🥤',name:'Bulk-Shake nach Training (Hafer + Erdnussmus + 400ml Milch + Banane)',kcal:1050,protein:55,cat:'shake'},
+  {id:'vollmilch',emoji:'🥛',name:'Vollmilch 3,5% (300ml)',kcal:190,protein:10,cat:'shake'},
   {id:'masseShake',emoji:'🥤',name:'Masse-Shake (Hafer+EB+Milch+Banane)',kcal:700,protein:25,cat:'shake'},
   {id:'proteinShake',emoji:'🥛',name:'Protein Shake (300ml Milch)',kcal:250,protein:30,cat:'shake'},
   {id:'haferflocken',emoji:'🌾',name:'Haferflocken (80g)',kcal:300,protein:10,cat:'shake'},
