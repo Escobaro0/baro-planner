@@ -115,22 +115,22 @@ Daten groß:           32px  Plex Mono 500   tabular-nums
 └─────────────────────────────┘
 ```
 
-## 6. Motion (Emil-Prinzipien)
+## 6. Motion (aktualisiert 2026-07-10 — Baran will eine lebendige App)
 
-Tool das oft auf geht → Animation ist Standard AUS bei Hochfrequenz-Aktionen.
+Animation ist erwünscht, solange sie schnell bleibt und auf transform/opacity/box-shadow läuft (GPU, kein Layout-Thrash).
 
 ```css
 --ease-out:   cubic-bezier(0.22, 1, 0.36, 1);
---t-instant:  0ms;     /* Tab-Wechsel, Navigation */
---t-quick:    150ms;   /* Toggle, Häkchen, Hover */
+--t-quick:    150ms;   /* Toggle, Häkchen, Hover, Tab-Fade */
 --t-enter:    200ms;   /* Sheets / Modals rein */
---t-fill:     400ms;   /* Fortschrittsbalken füllt — nur einmal */
+--t-fill:     400ms;   /* Fortschrittsbalken füllt */
 ```
 
-- Tab-Wechsel instant, kein Slide.
-- Nur Feedback animieren: Mahlzeit/Satz abhaken → kurzer Scale (0.95→1) + Farbwechsel in 150ms.
-- Readout-Zahl darf beim ersten Laden eines Stats-Views hochzählen — nicht bei jedem Tab-Wechsel.
-- `prefers-reduced-motion` respektieren.
+- Tab-Wechsel: kurzer Fade-up (150ms), nie länger.
+- Feedback überall: Buttons scale(0.97) beim Drücken, Abhaken mit Pop, Listen staggern rein, Zahlen zählen hoch.
+- Ambient-Motion erlaubt: pulsierende Status-Dots, sanfte Glows auf Aktiv-Zuständen.
+- Hochfrequenz-Aktionen bleiben unter 200ms — die App darf leben, aber nie bremsen.
+- `prefers-reduced-motion` respektieren (Pflicht, global).
 
 ## 7. Komponenten (Kern)
 
@@ -149,13 +149,17 @@ Tool das oft auf geht → Animation ist Standard AUS bei Hochfrequenz-Aktionen.
 - Fehler entschuldigen sich nicht, sie sagen was zu tun ist: "Kein Eintrag heute. Trag deine erste Mahlzeit ein."
 - Ein Element, ein Job.
 
-## 9. Anti-Patterns (hartes Nein)
+## 9. Anti-Patterns (aktualisiert 2026-07-10)
+
+**Erlaubt seit Juli 2026 (Barans Entscheidung):** Gradients und Glows — aber nur in der warmen Logbuch-Palette (Saffran/Amber/Status-Farben). Verläufe verbinden benachbarte Töne (Saffran→Amber, ok→caution), Glows sind weich und funktional (Aktiv-Zustand, Primär-Aktion, Status).
+
+Weiter hartes Nein:
 
 - ❌ Inter als Font.
-- ❌ Lila/Blau-Verläufe, dunkle Glows.
+- ❌ Lila/Blau-KI-Verläufe (kalte Fremdfarben — Verläufe bleiben in der warmen Palette).
 - ❌ Karte-in-Karte.
 - ❌ Emojis als Icons → stattdessen Phosphor oder Lucide.
 - ❌ Grauer Text auf farbiger Fläche.
 - ❌ Zentrierter Hero / Marketing-Layout.
 - ❌ Dekorative 01/02/03-Marker ohne echte Reihenfolge.
-- ❌ Animation bei Tab-Wechsel oder anderen Hochfrequenz-Aktionen.
+- ❌ Neumorphism (geprägte Doppel-Schatten-Buttons).
