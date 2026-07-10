@@ -249,20 +249,6 @@
     <div id="progressionHintText" style="font-size:14px;color:var(--muted);line-height:1.5;"></div>
   </div>
   <div id="exerciseList"></div>
-  <!-- Exercise log modal -->
-  <div id="logModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;justify-content:center;">
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:480px;border-top:1px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);" id="logModalTitle">Training loggen</div>
-        <button onclick="closeLogModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;">✕</button>
-      </div>
-      <div id="logModalLastWeek" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
-      <div id="setsLogger" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:280px;overflow-y:auto;"></div>
-      <button onclick="addLogSet()" style="width:100%;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:9px;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:12px;">+ Satz hinzufügen</button>
-      <input id="logNote" placeholder="Notiz (optional)..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;margin-bottom:12px;">
-      <button onclick="saveExerciseLog()" style="width:100%;background:var(--accent);border:none;border-radius:8px;padding:14px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;color:var(--bg);cursor:pointer;">Speichern</button>
-    </div>
-  </div>
   <!-- Add exercise -->
   <div id="addExercisePanel" style="margin-top:4px;display:none;">
     <button onclick="showAddExercise()" id="addExBtn" style="width:100%;background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:13px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;">+ Neue Übung hinzufügen</button>

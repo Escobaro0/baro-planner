@@ -2343,7 +2343,16 @@ Kurz und konkret. Deutsch.` }]
 // trainingLog: { 'YYYY-WW': { exerciseId: [{sets:[{reps,weight}], note, date}] } }
 let trainingLog = {};
 let logWeek = 'current'; // 'current' | 'last'
-let loggingExId = null;
+let expandedExId = null; // Accordion: welche Übungskarte ist aufgeklappt
+
+// Einheiten-Modi pro Übung (ex.unit, Default 'kg'). b = zweites Feld, bStep = ±-Schrittweite.
+const EX_UNITS = {
+  kg:  { label:'Wdh × kg',  a:'Wdh', b:'kg',  aStep:1, bStep:2.5 },
+  sek: { label:'Wdh × Sek', a:'Wdh', b:'Sek', aStep:1, bStep:5 },
+  min: { label:'Wdh × Min', a:'Wdh', b:'Min', aStep:1, bStep:1 },
+  zeit:{ label:'Nur Zeit',  a:null,  b:'Sek', aStep:0, bStep:15 },
+};
+function exUnit(ex){ return EX_UNITS[ex.unit] ? ex.unit : 'kg'; }
 
 function getWeekKey(offset=0){
   const d = new Date();
@@ -2415,20 +2424,18 @@ function renderExercises(){
     const i = exercises.indexOf(ex);
     const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
     const lastWeekEntry = getExerciseLogForWeek(ex.id, 1);
-    let logSummary = '';
+    const logSummary = exSummary(ex, weekOffset);
     let progressBadge = '';
-    if(logEntry){
+    if(logEntry && weekOffset===0 && lastWeekEntry){
       const totalReps = logEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
-      const maxWeight = Math.max(...logEntry.sets.map(s=>Number(s.weight||0)));
-      logSummary = `${logEntry.sets.length} Sätze · ${totalReps} Wdh${maxWeight>0?' · '+maxWeight+'kg':''}`;
-      if(weekOffset===0 && lastWeekEntry){
-        const lastReps = lastWeekEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
-        if(totalReps > lastReps) progressBadge = '<span class="log-badge pr-badge">+PR</span>';
-        else if(totalReps >= lastReps) progressBadge = '<span class="log-badge">&#x2713;</span>';
-      }
+      const lastReps = lastWeekEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
+      if(totalReps > lastReps) progressBadge = '<span class="log-badge pr-badge">+PR</span>';
+      else if(totalReps >= lastReps) progressBadge = '<span class="log-badge">&#x2713;</span>';
     }
+    const isOpen = !editMode && expandedExId === ex.id;
     return `
-    <div class="training-card" style="cursor:${editMode?'pointer':'default'};${editMode?'border-color:var(--rule-strong);':''}" onclick="${editMode?`openEditModal('${ex.id}')`:''}" >
+    <div class="training-card${isOpen?' expanded':''}" data-exid="${ex.id}" style="${editMode?'border-color:var(--rule-strong);':''}">
+      <div class="tc-head" onclick="${editMode?`openEditModal('${ex.id}')`:`toggleExercise('${ex.id}')`}">
       ${editMode ? `<div style="display:flex;flex-direction:column;gap:4px;margin-right:4px;">
         <button onclick="event.stopPropagation();moveEx('${ex.id}',-1)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:6px;width:26px;height:26px;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;" ${i===0?'disabled':''}>&#x2191;</button>
         <button onclick="event.stopPropagation();moveEx('${ex.id}',1)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:6px;width:26px;height:26px;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;" ${i===exercises.length-1?'disabled':''}>&#x2193;</button>
@@ -2436,12 +2443,14 @@ function renderExercises(){
       <div class="training-muscle" data-day="${ex.day||''}">${ex.detail}</div>
       <div class="training-info">
         <div class="training-name">${ex.name}${progressBadge}</div>
-        ${logSummary ? `<div style="font-size:13px;color:var(--ok);margin-top:3px;">&#x2713; ${weekLabel}: ${logSummary}</div>` : `<div style="font-size:13px;color:var(--muted);margin-top:3px;">${weekLabel}: noch nicht geloggt</div>`}
+        <div class="training-log-line" style="font-size:13px;margin-top:3px;color:${logSummary?'var(--ok)':'var(--muted)'};">${logSummary ? `&#x2713; ${weekLabel}: ${logSummary}` : `${weekLabel}: noch nicht geloggt`}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
         <div class="training-sets">${ex.sets} <span class="training-reps-inline">× ${ex.reps}</span></div>
-        ${!editMode ? `<button onclick="event.stopPropagation();openLogModal('${ex.id}')" style="width:30px;height:30px;background:${getExerciseLogForWeek(ex.id,0)?'var(--ok)':'var(--surface2)'};border:1px solid ${getExerciseLogForWeek(ex.id,0)?'var(--ok)':'var(--rule-strong)'};border-radius:8px;font-size:15px;color:${getExerciseLogForWeek(ex.id,0)?'var(--bg)':'var(--muted)'};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Training loggen">${getExerciseLogForWeek(ex.id,0)?'✓':'+'}</button>` : `<div style="font-size:15px;color:var(--ink-muted);">&#x203A;</div>`}
+        ${!editMode ? `<span class="tc-chevron"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>` : `<div style="font-size:15px;color:var(--ink-muted);">&#x203A;</div>`}
       </div>
+      </div>
+      ${isOpen ? buildExpand(ex) : ''}
     </div>`;
   };
 
@@ -2462,6 +2471,7 @@ function renderExercises(){
     html += others.map(card).join('');
   }
   list.innerHTML = html;
+  list.querySelectorAll('.set-row').forEach(attachSwipe);
 
   // Show progression hint if this week has data
   showProgressionHint();
@@ -2494,87 +2504,202 @@ async function showProgressionHint(){
   document.getElementById('progressionHintText').innerHTML = lines.join('<br>');
 }
 
-function openLogModal(exId){
-  loggingExId = exId;
+// ═══════════════════════════════════════════
+// INLINE-LOGGER: Accordion statt Modal.
+// Speichert live bei jeder Eingabe – kein "Speichern"-Button nötig.
+// ═══════════════════════════════════════════
+function toggleExercise(exId){
+  if(editMode) return;
+  expandedExId = (expandedExId === exId) ? null : exId;
+  renderExercises();
+}
+
+function setExUnit(exId, unit){
   const ex = exercises.find(e=>e.id===exId);
+  if(!ex || !EX_UNITS[unit]) return;
+  ex.unit = unit;
+  saveExercises();
+  renderExercises();
+}
+
+// Eine Satz-Zeile: [Nr] [− Wdh +] × [− kg/Sek/Min +] [✓]  (+ Delete hinter Swipe)
+function buildSetRow(ex, idx, val, ghost){
+  const u = EX_UNITS[exUnit(ex)];
+  const hasA = !!u.a;
+  const vA = val && Number(val.reps) > 0 ? val.reps : '';
+  const vB = val && Number(val.weight) > 0 ? val.weight : '';
+  const gA = ghost && Number(ghost.reps) > 0 ? ghost.reps : '';
+  const gB = ghost && Number(ghost.weight) > 0 ? ghost.weight : '';
+  const logged = hasA ? vA !== '' : vB !== '';
+  const stepper = (field, step, value, ghostVal, unitLbl) => `
+    <div class="set-stepper">
+      <button class="step-btn" onclick="stepSet(this,-${step},'${ex.id}')" aria-label="${unitLbl} verringern">−</button>
+      <div class="set-field">
+        <input class="set-input" type="number" inputmode="decimal" min="0" data-field="${field}"
+          value="${value}" placeholder="${ghostVal !== '' ? ghostVal : '0'}" oninput="saveInline('${ex.id}')">
+        <span class="set-unit">${unitLbl}</span>
+      </div>
+      <button class="step-btn" onclick="stepSet(this,${step},'${ex.id}')" aria-label="${unitLbl} erhöhen">+</button>
+    </div>`;
+  return `
+  <div class="set-row${logged ? ' logged' : ''}">
+    <button class="set-del" onclick="deleteSetRow(this,'${ex.id}')" aria-label="Satz löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+    <div class="set-row-inner">
+      <span class="set-num mono">${idx + 1}</span>
+      ${hasA ? stepper('reps', u.aStep, vA, gA, u.a) : ''}
+      ${hasA ? '<span class="set-x">×</span>' : ''}
+      ${stepper('weight', u.bStep, vB, gB, u.b)}
+      <button class="set-check" onclick="adoptSet(this,'${ex.id}')" aria-label="Satz übernehmen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+    </div>
+  </div>`;
+}
+
+// Aufgeklappter Karten-Teil: Einheiten-Switcher + Satz-Zeilen + Fußzeile
+function buildExpand(ex){
+  const weekOffset = logWeek === 'last' ? 1 : 0;
+  const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
+  const lastEntry = getExerciseLogForWeek(ex.id, 1);
+  const unit = exUnit(ex);
+  const count = logEntry ? logEntry.sets.length : (lastEntry ? lastEntry.sets.length : ex.sets);
+  let rows = '';
+  for(let i = 0; i < count; i++){
+    rows += buildSetRow(ex, i, logEntry ? logEntry.sets[i] : null,
+      weekOffset === 0 && lastEntry ? lastEntry.sets[i] : null);
+  }
+  const seg = Object.keys(EX_UNITS).map(k =>
+    `<button class="${k === unit ? 'active' : ''}" onclick="setExUnit('${ex.id}','${k}')">${EX_UNITS[k].label}</button>`).join('');
+  const hint = (weekOffset === 0 && lastEntry)
+    ? `<div class="ex-ghost-hint">Grau = letzte Woche · ✓ übernimmt den Wert direkt</div>` : '';
+  const note = (logEntry && logEntry.note) ? logEntry.note.replace(/"/g, '&quot;') : '';
+  return `
+  <div class="ex-expand" onclick="event.stopPropagation()">
+    <div class="unit-seg">${seg}</div>
+    ${hint}
+    <div class="set-rows" id="rows-${ex.id}">${rows}</div>
+    <div class="ex-expand-foot">
+      <button class="add-set-btn" onclick="addInlineSet('${ex.id}')">+ Satz</button>
+      <input class="ex-note-input" id="note-${ex.id}" placeholder="Notiz…" value="${note}" oninput="saveInline('${ex.id}')">
+    </div>
+  </div>`;
+}
+
+function rowValues(row){
+  const a = row.querySelector('input[data-field="reps"]');
+  const b = row.querySelector('input[data-field="weight"]');
+  return { reps: a ? (parseFloat(a.value) || 0) : 0, weight: b ? (parseFloat(b.value) || 0) : 0 };
+}
+
+// Live-Save: liest alle Zeilen der Übung und schreibt sie ins Log. Kein Re-Render → Fokus bleibt.
+function saveInline(exId){
+  const wrap = document.getElementById('rows-' + exId);
+  if(!wrap) return;
+  const ex = exercises.find(e => e.id === exId);
   if(!ex) return;
-
-  document.getElementById('logModalTitle').textContent = ex.name + ' loggen';
-
-  // Show last week's data
-  const lastEntry = getExerciseLogForWeek(exId, 1);
-  const lastWeekEl = document.getElementById('logModalLastWeek');
-  if(lastEntry){
-    const summary = lastEntry.sets.map((s,i)=>`Satz ${i+1}: ${s.reps} Wdh${s.weight>0?' × '+s.weight+'kg':''}`).join(' | ');
-    lastWeekEl.innerHTML = `<span style="color:var(--muted)">Letzte Woche:</span> ${summary}`;
+  const hasA = !!EX_UNITS[exUnit(ex)].a;
+  const sets = Array.from(wrap.querySelectorAll('.set-row')).map(rowValues)
+    .filter(s => hasA ? s.reps > 0 : s.weight > 0);
+  const weekKey = logWeek === 'last' ? getWeekKey(1) : getWeekKey(0);
+  if(sets.length === 0){
+    if(trainingLog[weekKey]) delete trainingLog[weekKey][exId];
   } else {
-    lastWeekEl.innerHTML = '<span style="color:var(--muted)">Letzte Woche: kein Eintrag</span>';
+    if(!trainingLog[weekKey]) trainingLog[weekKey] = {};
+    const noteEl = document.getElementById('note-' + exId);
+    trainingLog[weekKey][exId] = { sets, note: noteEl ? noteEl.value : '', date: new Date().toLocaleDateString('de-DE') };
+    if(logWeek !== 'last' && typeof TRAINING_DAYS !== 'undefined' && TRAINING_DAYS.some(d => d.key === ex.day)) setDayDone(ex.day, 'auto');
   }
-
-  // Pre-fill with last week or exercise defaults
-  const setsLogger = document.getElementById('setsLogger');
-  setsLogger.innerHTML = '';
-  const setsCount = lastEntry ? lastEntry.sets.length : ex.sets;
-  for(let i=0; i<setsCount; i++){
-    const prevSet = lastEntry?.sets[i];
-    addLogSet(prevSet?.reps || '', prevSet?.weight || '');
-  }
-
-  document.getElementById('logNote').value = '';
-  document.getElementById('logModal').style.display = 'flex';
+  saveTrainingLog();
+  wrap.querySelectorAll('.set-row').forEach(r => {
+    const v = rowValues(r);
+    r.classList.toggle('logged', hasA ? v.reps > 0 : v.weight > 0);
+  });
+  updateCardSummary(exId);
 }
 
-function addLogSet(reps='', weight=''){
-  const setsLogger = document.getElementById('setsLogger');
-  const idx = setsLogger.children.length + 1;
-  const div = document.createElement('div');
-  div.className = 'ex-log-row';
-  div.innerHTML = `
-    <span class="ex-log-label">Satz ${idx}</span>
-    <input type="number" placeholder="Wdh" value="${reps}" min="0" max="100" style="width:60px;">
-    <span style="font-size:11px;color:var(--muted);">×</span>
-    <input type="number" placeholder="kg" value="${weight}" min="0" max="300" step="0.5" style="width:70px;">
-    <span class="ex-log-del" onclick="this.parentElement.remove();renumberSets()">✕</span>`;
-  setsLogger.appendChild(div);
+// ± Buttons: leerer Input startet beim Ghost-Wert (letzte Woche), sonst bei 0
+function stepSet(btn, delta, exId){
+  const inp = btn.parentElement.querySelector('.set-input');
+  let v = parseFloat(inp.value);
+  if(isNaN(v)) v = parseFloat(inp.placeholder) || 0;
+  v = Math.max(0, Math.round((v + delta) * 10) / 10);
+  inp.value = v;
+  saveInline(exId);
 }
 
-function renumberSets(){
-  document.querySelectorAll('.ex-log-row').forEach((row,i)=>{
-    const lbl = row.querySelector('.ex-log-label');
-    if(lbl) lbl.textContent = `Satz ${i+1}`;
+// Grünes Häkchen: übernimmt Ghost-Werte ohne Tastatur
+function adoptSet(btn, exId){
+  const row = btn.closest('.set-row');
+  row.querySelectorAll('.set-input').forEach(inp => {
+    if(!inp.value && parseFloat(inp.placeholder) > 0) inp.value = inp.placeholder;
+  });
+  saveInline(exId);
+  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+  if(navigator.vibrate) navigator.vibrate(15);
+}
+
+function addInlineSet(exId){
+  const ex = exercises.find(e => e.id === exId);
+  const wrap = document.getElementById('rows-' + exId);
+  if(!ex || !wrap) return;
+  const idx = wrap.children.length;
+  const lastEntry = getExerciseLogForWeek(exId, 1);
+  const ghost = (logWeek !== 'last' && lastEntry) ? lastEntry.sets[idx] : null;
+  wrap.insertAdjacentHTML('beforeend', buildSetRow(ex, idx, null, ghost || null));
+  attachSwipe(wrap.lastElementChild);
+}
+
+function deleteSetRow(btn, exId){
+  const row = btn.closest('.set-row');
+  const wrap = row.parentElement;
+  row.remove();
+  Array.from(wrap.children).forEach((r, i) => {
+    const num = r.querySelector('.set-num');
+    if(num) num.textContent = i + 1;
+  });
+  saveInline(exId);
+}
+
+// Swipe-to-Delete: Zeile nach links ziehen legt den Lösch-Button frei
+function attachSwipe(row){
+  const inner = row.querySelector('.set-row-inner');
+  if(!inner) return;
+  let x0 = null, dx = 0, open = false;
+  row.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive:true});
+  row.addEventListener('touchmove', e => {
+    if(x0 === null) return;
+    dx = Math.max(-72, Math.min(0, e.touches[0].clientX - x0 + (open ? -58 : 0)));
+    inner.style.transform = 'translateX(' + dx + 'px)';
+  }, {passive:true});
+  row.addEventListener('touchend', () => {
+    open = dx < -40;
+    inner.style.transform = open ? 'translateX(-58px)' : '';
+    row.classList.toggle('swiped', open);
+    x0 = null; dx = 0;
   });
 }
 
-function closeLogModal(){
-  document.getElementById('logModal').style.display = 'none';
-  loggingExId = null;
+// Karten-Statuszeile live nachziehen (ohne Re-Render, Fokus bleibt im Input)
+function updateCardSummary(exId){
+  const ex = exercises.find(e => e.id === exId);
+  const el = document.querySelector('.training-card[data-exid="' + exId + '"] .training-log-line');
+  if(!ex || !el) return;
+  const weekOffset = logWeek === 'last' ? 1 : 0;
+  const weekLabel = logWeek === 'last' ? 'Letzte Woche' : 'Diese Woche';
+  const s = exSummary(ex, weekOffset);
+  if(s){ el.innerHTML = '&#x2713; ' + weekLabel + ': ' + s; el.style.color = 'var(--ok)'; }
+  else { el.textContent = weekLabel + ': noch nicht geloggt'; el.style.color = 'var(--muted)'; }
 }
 
-function saveExerciseLog(){
-  if(!loggingExId) return;
-  const rows = document.querySelectorAll('.ex-log-row');
-  const sets = Array.from(rows).map(row => {
-    const inputs = row.querySelectorAll('input');
-    return { reps: Number(inputs[0].value)||0, weight: Number(inputs[1].value)||0 };
-  }).filter(s => s.reps > 0);
-
-  if(sets.length === 0){ closeLogModal(); return; }
-
-  const weekKey = logWeek === 'last' ? getWeekKey(1) : getWeekKey(0);
-  if(!trainingLog[weekKey]) trainingLog[weekKey] = {};
-  trainingLog[weekKey][loggingExId] = {
-    sets,
-    note: document.getElementById('logNote').value,
-    date: new Date().toLocaleDateString('de-DE')
-  };
-  saveTrainingLog();
-  // Auto-Erkennung: eine Übung dieser Woche geloggt → Trainingstag gilt als erledigt (still, kein Coach-Push)
-  if(logWeek !== 'last'){
-    const ex = exercises.find(e=>e.id===loggingExId);
-    if(ex && TRAINING_DAYS.some(d=>d.key===ex.day)) setDayDone(ex.day,'auto');
-  }
-  closeLogModal();
-  renderExercises();
+// Einheiten-bewusste Zusammenfassung ("3 Sätze · 24 Wdh · 70kg" / "4 Sätze · 180 Sek")
+function exSummary(ex, weekOffset){
+  const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
+  if(!logEntry || !logEntry.sets.length) return '';
+  const u = EX_UNITS[exUnit(ex)];
+  const n = logEntry.sets.length;
+  const satz = n === 1 ? '1 Satz' : n + ' Sätze';
+  const totalReps = logEntry.sets.reduce((s, set) => s + Number(set.reps || 0), 0);
+  const maxB = Math.max(...logEntry.sets.map(s => Number(s.weight || 0)));
+  if(!u.a) return satz + ' · ' + logEntry.sets.reduce((s, set) => s + Number(set.weight || 0), 0) + ' ' + u.b;
+  return satz + ' · ' + totalReps + ' Wdh' + (maxB > 0 ? ' · ' + maxB + u.b.toLowerCase() : '');
 }
 
 // Tag-Button im Training-Tab: ein-/austoggeln. Manuelles Abhaken triggert eine Coach-Reaktion.
@@ -2592,8 +2717,6 @@ function toggleDayDone(dayKey){
   notifyCoachTrainingDone(dayKey);
 }
 
-// close log modal on overlay
-document.getElementById('logModal').addEventListener('click', function(e){ if(e.target===this) closeLogModal(); });
 document.getElementById('phaseModal').addEventListener('click', function(e){ if(e.target===this) cancelPhaseChange(); });
 
 
