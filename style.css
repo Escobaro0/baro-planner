@@ -539,3 +539,54 @@ body::before{
 .week-type{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:700;}
 .badge-now{font-size:9px;background:var(--accent);color:var(--bg);padding:2px 6px;border-radius:4px;font-weight:700;}
 .version-badge{text-align:center;font-size:10px;color:var(--border);margin-top:32px;}
+
+/* ════════════════════════════════════════════
+   UI-UPDATE Juli 2026: Motion, Interaktion, iPad
+════════════════════════════════════════════ */
+
+/* Tab-Wechsel: schneller Fade-up. 150ms, damit Hochfrequenz-Nutzung nie wartet. */
+@keyframes pageIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page.active{animation:pageIn 150ms var(--ease-out);}
+
+/* Einheitliches Press-Feedback: jedes tippbare Element antwortet physisch. */
+button{touch-action:manipulation;}
+button:active{transform:scale(0.97);}
+.ai-send-btn:active{transform:scale(0.94);}
+.nav-item:active{transform:scale(0.94);}
+
+/* Sichtbarer Fokus für Tastatur/iPad-Trackpad */
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* Hover nur auf echten Pointern (iPad-Trackpad, Desktop) – nie Touch-Fehltrigger */
+@media (hover:hover) and (pointer:fine){
+  .nav-item:hover{color:var(--ink);}
+  .nav-item.active:hover{color:var(--accent);}
+  .meal-tile:hover{border-color:var(--rule-strong);transform:translateY(-1px);}
+  .qp-btn:hover,.ctx-chip:hover{border-color:var(--rule-strong);color:var(--ink);}
+  .review-btn:hover,.week-item:hover{border-color:var(--rule-strong);}
+}
+
+/* Ziele-&-Stats-Spalten: mobil gestapelt */
+.gs-cols{display:block;}
+
+/* ── iPad Hochformat & breite Fenster: Inhalt atmet, Grids nutzen die Breite ── */
+@media (min-width:700px){
+  .container{max-width:680px;}
+  .meal-grid{grid-template-columns:repeat(3,1fr);}
+  .gs-cols{display:grid;grid-template-columns:1fr 1fr;gap:0 28px;align-items:start;}
+}
+
+/* ── iPad Querformat & Desktop: Bottom-Nav wird zur Seitenleiste ── */
+@media (min-width:1000px){
+  body{padding-left:96px;padding-bottom:24px;}
+  .bottom-nav{
+    top:0;bottom:0;left:0;right:auto;width:96px;
+    flex-direction:column;justify-content:center;gap:6px;
+    border-top:none;border-right:1px solid var(--rule);
+    padding-bottom:0;padding-top:var(--safe-top);
+  }
+  .nav-item{flex:0 0 auto;padding:13px 8px;font-size:10px;gap:5px;border-radius:10px;margin:0 10px;}
+  .nav-item.active{background:var(--surface);}
+  .container{max-width:760px;}
+  .meal-grid{grid-template-columns:repeat(4,1fr);}
+}
