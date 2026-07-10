@@ -298,8 +298,6 @@ function setHabitAuto(id, achieved){
   } else { return; }
   try{ saveStorage(); }catch(e){}
   try{ updateTodayScore(); }catch(e){}
-  const fb = document.getElementById('page-feedback');
-  if(fb && fb.classList.contains('active')) renderFeedback();
 }
 
 const weekHistory = [
@@ -450,10 +448,8 @@ function showPage(id,el){
     if(id!=='ai') chatSourceTab = id;   // Quelle für den Chat-Kontext merken
     if(id==='plan'){ renderPlan(); renderWeeks(); }
     if(id==='nutrition'){ try{ updateNutritionNote(); applyPhaseUI(); renderMealGrid(); renderLog(); }catch(e){console.error('nutrition:',e);} }
-    if(id==='feedback'){ try{ renderFeedback(); }catch(e){console.error('feedback:',e);} }
     if(id==='training'){ renderExercises(); }
-    if(id==='stats'){ try{ renderStats(); }catch(e){console.error('stats:',e);} }
-    if(id==='goals'){ try{ renderGoals(); renderHolidays(); checkUpcomingHoliday(); renderNotifSettings(); }catch(e){console.error('goals:',e);} }
+    if(id==='goals'){ try{ renderStats(); renderGoals(); renderHolidays(); checkUpcomingHoliday(); renderNotifSettings(); }catch(e){console.error('goals:',e);} }
     if(id==='ai'){ try{ chatContext = contextFromTab(chatSourceTab); renderChatContextChip(); renderQuickPrompts(); renderChatHistory(); checkApiKeyBanner(); renderMemoryStatus(); }catch(e){console.error('ai:',e);} }
   }catch(e){ console.error('showPage error:',e); }
 }
@@ -884,9 +880,6 @@ document.getElementById('confirmSheet').addEventListener('click', function(e){
 });
 document.getElementById('numberSheet').addEventListener('click', function(e){
   if(e.target===this) resolveNumber(false);
-});
-document.getElementById('habitModal').addEventListener('click', function(e){
-  if(e.target===this) closeHabitModal();
 });
 
 // ═══════════════════════════════════════════
@@ -1431,7 +1424,7 @@ function restoreFromBackup(data){
     }catch(e){}
   }
   try{
-    renderExercises(); renderGoals(); renderFeedback(); updateRing();
+    renderExercises(); renderGoals(); updateRing();
     if(typeof renderPlan==='function') renderPlan();
     if(typeof renderWeeks==='function') renderWeeks();
     if(typeof renderWeight==='function') renderWeight();
@@ -1467,8 +1460,7 @@ let chatContext   = 'general'; // 'training' | 'plan' | 'check' | 'general'
 function contextFromTab(t){
   if(t==='training') return 'training';
   if(t==='plan')     return 'plan';
-  if(t==='feedback') return 'check';
-  return 'general';            // nutrition/goals/stats → voll holistisch
+  return 'general';            // nutrition/goals → voll holistisch
 }
 // Modell-Wahl: Sonnet für analytische Reviews (Check), sonst schnelles Haiku.
 function modelForContext(ctx){ return ctx === 'check' ? ADVISOR_MODEL : CHAT_MODEL; }
@@ -2351,7 +2343,16 @@ Kurz und konkret. Deutsch.` }]
 // trainingLog: { 'YYYY-WW': { exerciseId: [{sets:[{reps,weight}], note, date}] } }
 let trainingLog = {};
 let logWeek = 'current'; // 'current' | 'last'
-let loggingExId = null;
+let expandedExId = null; // Accordion: welche Übungskarte ist aufgeklappt
+
+// Einheiten-Modi pro Übung (ex.unit, Default 'kg'). b = zweites Feld, bStep = ±-Schrittweite.
+const EX_UNITS = {
+  kg:  { label:'Wdh × kg',  a:'Wdh', b:'kg',  aStep:1, bStep:2.5 },
+  sek: { label:'Wdh × Sek', a:'Wdh', b:'Sek', aStep:1, bStep:5 },
+  min: { label:'Wdh × Min', a:'Wdh', b:'Min', aStep:1, bStep:1 },
+  zeit:{ label:'Nur Zeit',  a:null,  b:'Sek', aStep:0, bStep:15 },
+};
+function exUnit(ex){ return EX_UNITS[ex.unit] ? ex.unit : 'kg'; }
 
 function getWeekKey(offset=0){
   const d = new Date();
@@ -2423,20 +2424,18 @@ function renderExercises(){
     const i = exercises.indexOf(ex);
     const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
     const lastWeekEntry = getExerciseLogForWeek(ex.id, 1);
-    let logSummary = '';
+    const logSummary = exSummary(ex, weekOffset);
     let progressBadge = '';
-    if(logEntry){
+    if(logEntry && weekOffset===0 && lastWeekEntry){
       const totalReps = logEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
-      const maxWeight = Math.max(...logEntry.sets.map(s=>Number(s.weight||0)));
-      logSummary = `${logEntry.sets.length} Sätze · ${totalReps} Wdh${maxWeight>0?' · '+maxWeight+'kg':''}`;
-      if(weekOffset===0 && lastWeekEntry){
-        const lastReps = lastWeekEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
-        if(totalReps > lastReps) progressBadge = '<span class="log-badge pr-badge">+PR</span>';
-        else if(totalReps >= lastReps) progressBadge = '<span class="log-badge">&#x2713;</span>';
-      }
+      const lastReps = lastWeekEntry.sets.reduce((s,set)=>s+Number(set.reps||0),0);
+      if(totalReps > lastReps) progressBadge = '<span class="log-badge pr-badge">+PR</span>';
+      else if(totalReps >= lastReps) progressBadge = '<span class="log-badge">&#x2713;</span>';
     }
+    const isOpen = !editMode && expandedExId === ex.id;
     return `
-    <div class="training-card" style="cursor:${editMode?'pointer':'default'};${editMode?'border-color:var(--rule-strong);':''}" onclick="${editMode?`openEditModal('${ex.id}')`:''}" >
+    <div class="training-card${isOpen?' expanded':''}" data-exid="${ex.id}" style="${editMode?'border-color:var(--rule-strong);':''}">
+      <div class="tc-head" onclick="${editMode?`openEditModal('${ex.id}')`:`toggleExercise('${ex.id}')`}">
       ${editMode ? `<div style="display:flex;flex-direction:column;gap:4px;margin-right:4px;">
         <button onclick="event.stopPropagation();moveEx('${ex.id}',-1)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:6px;width:26px;height:26px;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;" ${i===0?'disabled':''}>&#x2191;</button>
         <button onclick="event.stopPropagation();moveEx('${ex.id}',1)" style="background:var(--surface2);border:1px solid var(--rule);border-radius:6px;width:26px;height:26px;color:var(--muted);cursor:pointer;font-size:13px;line-height:1;" ${i===exercises.length-1?'disabled':''}>&#x2193;</button>
@@ -2444,12 +2443,14 @@ function renderExercises(){
       <div class="training-muscle" data-day="${ex.day||''}">${ex.detail}</div>
       <div class="training-info">
         <div class="training-name">${ex.name}${progressBadge}</div>
-        ${logSummary ? `<div style="font-size:13px;color:var(--ok);margin-top:3px;">&#x2713; ${weekLabel}: ${logSummary}</div>` : `<div style="font-size:13px;color:var(--muted);margin-top:3px;">${weekLabel}: noch nicht geloggt</div>`}
+        <div class="training-log-line" style="font-size:13px;margin-top:3px;color:${logSummary?'var(--ok)':'var(--muted)'};">${logSummary ? `&#x2713; ${weekLabel}: ${logSummary}` : `${weekLabel}: noch nicht geloggt`}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
         <div class="training-sets">${ex.sets} <span class="training-reps-inline">× ${ex.reps}</span></div>
-        ${!editMode ? `<button onclick="event.stopPropagation();openLogModal('${ex.id}')" style="width:30px;height:30px;background:${getExerciseLogForWeek(ex.id,0)?'var(--ok)':'var(--surface2)'};border:1px solid ${getExerciseLogForWeek(ex.id,0)?'var(--ok)':'var(--rule-strong)'};border-radius:8px;font-size:15px;color:${getExerciseLogForWeek(ex.id,0)?'var(--bg)':'var(--muted)'};cursor:pointer;display:flex;align-items:center;justify-content:center;" title="Training loggen">${getExerciseLogForWeek(ex.id,0)?'✓':'+'}</button>` : `<div style="font-size:15px;color:var(--ink-muted);">&#x203A;</div>`}
+        ${!editMode ? `<span class="tc-chevron"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>` : `<div style="font-size:15px;color:var(--ink-muted);">&#x203A;</div>`}
       </div>
+      </div>
+      ${isOpen ? buildExpand(ex) : ''}
     </div>`;
   };
 
@@ -2470,6 +2471,7 @@ function renderExercises(){
     html += others.map(card).join('');
   }
   list.innerHTML = html;
+  list.querySelectorAll('.set-row').forEach(attachSwipe);
 
   // Show progression hint if this week has data
   showProgressionHint();
@@ -2502,87 +2504,202 @@ async function showProgressionHint(){
   document.getElementById('progressionHintText').innerHTML = lines.join('<br>');
 }
 
-function openLogModal(exId){
-  loggingExId = exId;
+// ═══════════════════════════════════════════
+// INLINE-LOGGER: Accordion statt Modal.
+// Speichert live bei jeder Eingabe – kein "Speichern"-Button nötig.
+// ═══════════════════════════════════════════
+function toggleExercise(exId){
+  if(editMode) return;
+  expandedExId = (expandedExId === exId) ? null : exId;
+  renderExercises();
+}
+
+function setExUnit(exId, unit){
   const ex = exercises.find(e=>e.id===exId);
+  if(!ex || !EX_UNITS[unit]) return;
+  ex.unit = unit;
+  saveExercises();
+  renderExercises();
+}
+
+// Eine Satz-Zeile: [Nr] [− Wdh +] × [− kg/Sek/Min +] [✓]  (+ Delete hinter Swipe)
+function buildSetRow(ex, idx, val, ghost){
+  const u = EX_UNITS[exUnit(ex)];
+  const hasA = !!u.a;
+  const vA = val && Number(val.reps) > 0 ? val.reps : '';
+  const vB = val && Number(val.weight) > 0 ? val.weight : '';
+  const gA = ghost && Number(ghost.reps) > 0 ? ghost.reps : '';
+  const gB = ghost && Number(ghost.weight) > 0 ? ghost.weight : '';
+  const logged = hasA ? vA !== '' : vB !== '';
+  const stepper = (field, step, value, ghostVal, unitLbl) => `
+    <div class="set-stepper">
+      <button class="step-btn" onclick="stepSet(this,-${step},'${ex.id}')" aria-label="${unitLbl} verringern">−</button>
+      <div class="set-field">
+        <input class="set-input" type="number" inputmode="decimal" min="0" data-field="${field}"
+          value="${value}" placeholder="${ghostVal !== '' ? ghostVal : '0'}" oninput="saveInline('${ex.id}')">
+        <span class="set-unit">${unitLbl}</span>
+      </div>
+      <button class="step-btn" onclick="stepSet(this,${step},'${ex.id}')" aria-label="${unitLbl} erhöhen">+</button>
+    </div>`;
+  return `
+  <div class="set-row${logged ? ' logged' : ''}">
+    <button class="set-del" onclick="deleteSetRow(this,'${ex.id}')" aria-label="Satz löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
+    <div class="set-row-inner">
+      <span class="set-num mono">${idx + 1}</span>
+      ${hasA ? stepper('reps', u.aStep, vA, gA, u.a) : ''}
+      ${hasA ? '<span class="set-x">×</span>' : ''}
+      ${stepper('weight', u.bStep, vB, gB, u.b)}
+      <button class="set-check" onclick="adoptSet(this,'${ex.id}')" aria-label="Satz übernehmen"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></button>
+    </div>
+  </div>`;
+}
+
+// Aufgeklappter Karten-Teil: Einheiten-Switcher + Satz-Zeilen + Fußzeile
+function buildExpand(ex){
+  const weekOffset = logWeek === 'last' ? 1 : 0;
+  const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
+  const lastEntry = getExerciseLogForWeek(ex.id, 1);
+  const unit = exUnit(ex);
+  const count = logEntry ? logEntry.sets.length : (lastEntry ? lastEntry.sets.length : ex.sets);
+  let rows = '';
+  for(let i = 0; i < count; i++){
+    rows += buildSetRow(ex, i, logEntry ? logEntry.sets[i] : null,
+      weekOffset === 0 && lastEntry ? lastEntry.sets[i] : null);
+  }
+  const seg = Object.keys(EX_UNITS).map(k =>
+    `<button class="${k === unit ? 'active' : ''}" onclick="setExUnit('${ex.id}','${k}')">${EX_UNITS[k].label}</button>`).join('');
+  const hint = (weekOffset === 0 && lastEntry)
+    ? `<div class="ex-ghost-hint">Grau = letzte Woche · ✓ übernimmt den Wert direkt</div>` : '';
+  const note = (logEntry && logEntry.note) ? logEntry.note.replace(/"/g, '&quot;') : '';
+  return `
+  <div class="ex-expand" onclick="event.stopPropagation()">
+    <div class="unit-seg">${seg}</div>
+    ${hint}
+    <div class="set-rows" id="rows-${ex.id}">${rows}</div>
+    <div class="ex-expand-foot">
+      <button class="add-set-btn" onclick="addInlineSet('${ex.id}')">+ Satz</button>
+      <input class="ex-note-input" id="note-${ex.id}" placeholder="Notiz…" value="${note}" oninput="saveInline('${ex.id}')">
+    </div>
+  </div>`;
+}
+
+function rowValues(row){
+  const a = row.querySelector('input[data-field="reps"]');
+  const b = row.querySelector('input[data-field="weight"]');
+  return { reps: a ? (parseFloat(a.value) || 0) : 0, weight: b ? (parseFloat(b.value) || 0) : 0 };
+}
+
+// Live-Save: liest alle Zeilen der Übung und schreibt sie ins Log. Kein Re-Render → Fokus bleibt.
+function saveInline(exId){
+  const wrap = document.getElementById('rows-' + exId);
+  if(!wrap) return;
+  const ex = exercises.find(e => e.id === exId);
   if(!ex) return;
-
-  document.getElementById('logModalTitle').textContent = ex.name + ' loggen';
-
-  // Show last week's data
-  const lastEntry = getExerciseLogForWeek(exId, 1);
-  const lastWeekEl = document.getElementById('logModalLastWeek');
-  if(lastEntry){
-    const summary = lastEntry.sets.map((s,i)=>`Satz ${i+1}: ${s.reps} Wdh${s.weight>0?' × '+s.weight+'kg':''}`).join(' | ');
-    lastWeekEl.innerHTML = `<span style="color:var(--muted)">Letzte Woche:</span> ${summary}`;
+  const hasA = !!EX_UNITS[exUnit(ex)].a;
+  const sets = Array.from(wrap.querySelectorAll('.set-row')).map(rowValues)
+    .filter(s => hasA ? s.reps > 0 : s.weight > 0);
+  const weekKey = logWeek === 'last' ? getWeekKey(1) : getWeekKey(0);
+  if(sets.length === 0){
+    if(trainingLog[weekKey]) delete trainingLog[weekKey][exId];
   } else {
-    lastWeekEl.innerHTML = '<span style="color:var(--muted)">Letzte Woche: kein Eintrag</span>';
+    if(!trainingLog[weekKey]) trainingLog[weekKey] = {};
+    const noteEl = document.getElementById('note-' + exId);
+    trainingLog[weekKey][exId] = { sets, note: noteEl ? noteEl.value : '', date: new Date().toLocaleDateString('de-DE') };
+    if(logWeek !== 'last' && typeof TRAINING_DAYS !== 'undefined' && TRAINING_DAYS.some(d => d.key === ex.day)) setDayDone(ex.day, 'auto');
   }
-
-  // Pre-fill with last week or exercise defaults
-  const setsLogger = document.getElementById('setsLogger');
-  setsLogger.innerHTML = '';
-  const setsCount = lastEntry ? lastEntry.sets.length : ex.sets;
-  for(let i=0; i<setsCount; i++){
-    const prevSet = lastEntry?.sets[i];
-    addLogSet(prevSet?.reps || '', prevSet?.weight || '');
-  }
-
-  document.getElementById('logNote').value = '';
-  document.getElementById('logModal').style.display = 'flex';
+  saveTrainingLog();
+  wrap.querySelectorAll('.set-row').forEach(r => {
+    const v = rowValues(r);
+    r.classList.toggle('logged', hasA ? v.reps > 0 : v.weight > 0);
+  });
+  updateCardSummary(exId);
 }
 
-function addLogSet(reps='', weight=''){
-  const setsLogger = document.getElementById('setsLogger');
-  const idx = setsLogger.children.length + 1;
-  const div = document.createElement('div');
-  div.className = 'ex-log-row';
-  div.innerHTML = `
-    <span class="ex-log-label">Satz ${idx}</span>
-    <input type="number" placeholder="Wdh" value="${reps}" min="0" max="100" style="width:60px;">
-    <span style="font-size:11px;color:var(--muted);">×</span>
-    <input type="number" placeholder="kg" value="${weight}" min="0" max="300" step="0.5" style="width:70px;">
-    <span class="ex-log-del" onclick="this.parentElement.remove();renumberSets()">✕</span>`;
-  setsLogger.appendChild(div);
+// ± Buttons: leerer Input startet beim Ghost-Wert (letzte Woche), sonst bei 0
+function stepSet(btn, delta, exId){
+  const inp = btn.parentElement.querySelector('.set-input');
+  let v = parseFloat(inp.value);
+  if(isNaN(v)) v = parseFloat(inp.placeholder) || 0;
+  v = Math.max(0, Math.round((v + delta) * 10) / 10);
+  inp.value = v;
+  saveInline(exId);
 }
 
-function renumberSets(){
-  document.querySelectorAll('.ex-log-row').forEach((row,i)=>{
-    const lbl = row.querySelector('.ex-log-label');
-    if(lbl) lbl.textContent = `Satz ${i+1}`;
+// Grünes Häkchen: übernimmt Ghost-Werte ohne Tastatur
+function adoptSet(btn, exId){
+  const row = btn.closest('.set-row');
+  row.querySelectorAll('.set-input').forEach(inp => {
+    if(!inp.value && parseFloat(inp.placeholder) > 0) inp.value = inp.placeholder;
+  });
+  saveInline(exId);
+  btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop');
+  if(navigator.vibrate) navigator.vibrate(15);
+}
+
+function addInlineSet(exId){
+  const ex = exercises.find(e => e.id === exId);
+  const wrap = document.getElementById('rows-' + exId);
+  if(!ex || !wrap) return;
+  const idx = wrap.children.length;
+  const lastEntry = getExerciseLogForWeek(exId, 1);
+  const ghost = (logWeek !== 'last' && lastEntry) ? lastEntry.sets[idx] : null;
+  wrap.insertAdjacentHTML('beforeend', buildSetRow(ex, idx, null, ghost || null));
+  attachSwipe(wrap.lastElementChild);
+}
+
+function deleteSetRow(btn, exId){
+  const row = btn.closest('.set-row');
+  const wrap = row.parentElement;
+  row.remove();
+  Array.from(wrap.children).forEach((r, i) => {
+    const num = r.querySelector('.set-num');
+    if(num) num.textContent = i + 1;
+  });
+  saveInline(exId);
+}
+
+// Swipe-to-Delete: Zeile nach links ziehen legt den Lösch-Button frei
+function attachSwipe(row){
+  const inner = row.querySelector('.set-row-inner');
+  if(!inner) return;
+  let x0 = null, dx = 0, open = false;
+  row.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, {passive:true});
+  row.addEventListener('touchmove', e => {
+    if(x0 === null) return;
+    dx = Math.max(-72, Math.min(0, e.touches[0].clientX - x0 + (open ? -58 : 0)));
+    inner.style.transform = 'translateX(' + dx + 'px)';
+  }, {passive:true});
+  row.addEventListener('touchend', () => {
+    open = dx < -40;
+    inner.style.transform = open ? 'translateX(-58px)' : '';
+    row.classList.toggle('swiped', open);
+    x0 = null; dx = 0;
   });
 }
 
-function closeLogModal(){
-  document.getElementById('logModal').style.display = 'none';
-  loggingExId = null;
+// Karten-Statuszeile live nachziehen (ohne Re-Render, Fokus bleibt im Input)
+function updateCardSummary(exId){
+  const ex = exercises.find(e => e.id === exId);
+  const el = document.querySelector('.training-card[data-exid="' + exId + '"] .training-log-line');
+  if(!ex || !el) return;
+  const weekOffset = logWeek === 'last' ? 1 : 0;
+  const weekLabel = logWeek === 'last' ? 'Letzte Woche' : 'Diese Woche';
+  const s = exSummary(ex, weekOffset);
+  if(s){ el.innerHTML = '&#x2713; ' + weekLabel + ': ' + s; el.style.color = 'var(--ok)'; }
+  else { el.textContent = weekLabel + ': noch nicht geloggt'; el.style.color = 'var(--muted)'; }
 }
 
-function saveExerciseLog(){
-  if(!loggingExId) return;
-  const rows = document.querySelectorAll('.ex-log-row');
-  const sets = Array.from(rows).map(row => {
-    const inputs = row.querySelectorAll('input');
-    return { reps: Number(inputs[0].value)||0, weight: Number(inputs[1].value)||0 };
-  }).filter(s => s.reps > 0);
-
-  if(sets.length === 0){ closeLogModal(); return; }
-
-  const weekKey = logWeek === 'last' ? getWeekKey(1) : getWeekKey(0);
-  if(!trainingLog[weekKey]) trainingLog[weekKey] = {};
-  trainingLog[weekKey][loggingExId] = {
-    sets,
-    note: document.getElementById('logNote').value,
-    date: new Date().toLocaleDateString('de-DE')
-  };
-  saveTrainingLog();
-  // Auto-Erkennung: eine Übung dieser Woche geloggt → Trainingstag gilt als erledigt (still, kein Coach-Push)
-  if(logWeek !== 'last'){
-    const ex = exercises.find(e=>e.id===loggingExId);
-    if(ex && TRAINING_DAYS.some(d=>d.key===ex.day)) setDayDone(ex.day,'auto');
-  }
-  closeLogModal();
-  renderExercises();
+// Einheiten-bewusste Zusammenfassung ("3 Sätze · 24 Wdh · 70kg" / "4 Sätze · 180 Sek")
+function exSummary(ex, weekOffset){
+  const logEntry = getExerciseLogForWeek(ex.id, weekOffset);
+  if(!logEntry || !logEntry.sets.length) return '';
+  const u = EX_UNITS[exUnit(ex)];
+  const n = logEntry.sets.length;
+  const satz = n === 1 ? '1 Satz' : n + ' Sätze';
+  const totalReps = logEntry.sets.reduce((s, set) => s + Number(set.reps || 0), 0);
+  const maxB = Math.max(...logEntry.sets.map(s => Number(s.weight || 0)));
+  if(!u.a) return satz + ' · ' + logEntry.sets.reduce((s, set) => s + Number(set.weight || 0), 0) + ' ' + u.b;
+  return satz + ' · ' + totalReps + ' Wdh' + (maxB > 0 ? ' · ' + maxB + u.b.toLowerCase() : '');
 }
 
 // Tag-Button im Training-Tab: ein-/austoggeln. Manuelles Abhaken triggert eine Coach-Reaktion.
@@ -2600,158 +2717,18 @@ function toggleDayDone(dayKey){
   notifyCoachTrainingDone(dayKey);
 }
 
-// close log modal on overlay
-document.getElementById('logModal').addEventListener('click', function(e){ if(e.target===this) closeLogModal(); });
 document.getElementById('phaseModal').addEventListener('click', function(e){ if(e.target===this) cancelPhaseChange(); });
 
 
 // ═══════════════════════════════════════════
-// FEEDBACK / HABIT TRACKER
+// HABIT-SCORE (läuft automatisch über setHabitAuto – der Check-Tab ist Geschichte)
 // ═══════════════════════════════════════════
-let habitEditMode = false;
-let editingHabitId = null;
-
-function toggleHabitEdit(){
-  habitEditMode = !habitEditMode;
-  const btn = document.getElementById('habitEditBtn');
-  if(btn){ btn.textContent = habitEditMode ? 'Fertig' : 'Bearbeiten'; btn.classList.toggle('active-edit', habitEditMode); }
-  renderFeedback();
-}
-
-function openHabitModal(id){
-  editingHabitId = id;
-  const h = id ? HABITS.find(x=>x.id===id) : null;
-  document.getElementById('habitModalTitle').textContent = h ? 'Habit bearbeiten' : 'Neues Habit';
-  document.getElementById('hm-name').value = h ? h.name : '';
-  document.getElementById('hm-desc').value = h ? h.desc : '';
-  document.getElementById('hm-mandatory').checked = !!(h && h.mandatory);
-  document.getElementById('hmDelBtn').style.display = h ? 'flex' : 'none';
-  document.getElementById('habitModal').classList.add('open');
-}
-function closeHabitModal(){ document.getElementById('habitModal').classList.remove('open'); editingHabitId = null; }
-
-function saveHabitModal(){
-  const name = document.getElementById('hm-name').value.trim();
-  if(!name) return;
-  const desc = document.getElementById('hm-desc').value.trim();
-  const mandatory = document.getElementById('hm-mandatory').checked;
-  if(editingHabitId){
-    const h = HABITS.find(x=>x.id===editingHabitId);
-    if(h){ h.name = name; h.desc = desc; h.mandatory = mandatory; }
-  } else {
-    HABITS.push({ id:'h_'+Date.now(), name, desc, mandatory });
-  }
-  saveHabits(); closeHabitModal(); renderFeedback(); updateTodayScore();
-}
-
-async function deleteHabit(){
-  if(!editingHabitId) return;
-  if(!await askConfirm('Habit löschen? Der heutige Status geht mit verloren.', 'Löschen')) return;
-  HABITS = HABITS.filter(h=>h.id!==editingHabitId);
-  delete habitStatus[editingHabitId];
-  saveHabits(); saveStorage(); closeHabitModal(); renderFeedback(); updateTodayScore();
-}
-
-function cycleHabit(id){
-  const cur=habitStatus[id]||null;
-  const next=cur===null?'done':cur==='done'?'partial':cur==='partial'?'missed':null;
-  habitStatus[id]=next;
-  manualHabits[id]=true; delete autoHabits[id];  // Baran entscheidet selbst → Auto-Sync raus
-  renderFeedback(); saveStorage(); updateTodayScore();
-}
-
 function calcScore(){
   const vals=HABITS.map(h=>habitStatus[h.id]);
   const scored=vals.filter(v=>v!==null&&v!==undefined);
   if(scored.length===0) return null;
   const pts=scored.reduce((s,v)=>s+(v==='done'?100:v==='partial'?50:0),0);
   return Math.round(pts/HABITS.length);
-}
-
-function renderFeedback(){
-  const now=new Date();
-  const dateEl=document.getElementById('feedbackDate');
-  if(dateEl) dateEl.textContent=now.toLocaleDateString('de-DE',{weekday:'long',day:'numeric',month:'long'});
-
-  const habitCardEl=document.getElementById('habitCard');
-  if(habitCardEl){
-    habitCardEl.innerHTML=HABITS.map(h=>{
-      const s=habitStatus[h.id]||null;
-      const cls=(s?s:'')+(h.mandatory?' mandatory':'');
-      const icon=s==='done'?'✓':s==='partial'?'~':s==='missed'?'✗':'';
-      const statusTxt=s==='done'?'Erledigt':s==='partial'?'Teilweise':s==='missed'?'Nicht geschafft':'Tippen zum Bewerten';
-      const lock=h.mandatory?'<span class="habit-lock" title="Nicht verhandelbar"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>':'';
-      if(habitEditMode){
-        return `<div class="habit-row" onclick="openHabitModal('${h.id}')">
-          <div class="habit-check"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></div>
-          <div class="habit-info">
-            <div class="habit-name">${h.name}${lock}</div>
-            <div class="habit-desc">${h.desc}</div>
-          </div>
-          <div class="habit-status" style="color:var(--muted);">›</div>
-        </div>`;
-      }
-      return `<div class="habit-row ${cls}" onclick="cycleHabit('${h.id}')">
-        <div class="habit-check">${icon}</div>
-        <div class="habit-info">
-          <div class="habit-name">${h.name}${lock}</div>
-          <div class="habit-desc">${h.desc}</div>
-        </div>
-        <div class="habit-status">${statusTxt}</div>
-      </div>`;
-    }).join('') + (habitEditMode ? `<div class="habit-row" onclick="openHabitModal(null)" style="justify-content:center;"><span style="font-size:13px;color:var(--muted);">+ Neues Habit</span></div>` : '');
-  }
-
-  const score=calcScore();
-  const scoreEl=document.getElementById('scoreNum');
-  const barEl=document.getElementById('scoreBarFill');
-  if(scoreEl){
-    if(score===null){ scoreEl.textContent='–'; if(barEl) barEl.style.width='0%'; }
-    else {
-      scoreEl.textContent=score+'%';
-      scoreEl.style.color=score>=80?'var(--ok)':score>=50?'var(--caution)':'var(--over)';
-      if(barEl){ barEl.style.width=score+'%'; barEl.style.background=score>=80?'var(--ok)':score>=50?'var(--caution)':'var(--over)'; }
-    }
-  }
-
-  const heatmapEl=document.getElementById('heatmap');
-  if(heatmapEl) heatmapEl.innerHTML=weekHistory.map(d=>{
-    const cls=d.score===null?'empty':d.score>=80?'great':d.score>=50?'ok':'bad';
-    return `<div class="heatmap-day ${cls}">${d.day}<br>${d.score!==null?d.score+'%':''}</div>`;
-  }).join('');
-
-  const aiFBEl=document.getElementById('aiFeedback');
-  if(aiFBEl){
-    const done=HABITS.filter(h=>habitStatus[h.id]==='done').map(h=>h.name);
-    const missed=HABITS.filter(h=>habitStatus[h.id]==='missed').map(h=>h.name);
-    const partial=HABITS.filter(h=>habitStatus[h.id]==='partial').map(h=>h.name);
-    let txt='';
-    if(score===null){ txt='Bewerte erst deine Habits oben.'; }
-    else {
-      if(done.length>0) txt+=`<strong>Gut gemacht:</strong> ${done.join(', ')}. `;
-      if(partial.length>0) txt+=`<strong>Fast:</strong> ${partial.join(', ')}. `;
-      if(missed.length>0) txt+=`<strong>Nicht geschafft:</strong> ${missed.join(', ')}. `;
-      if(score>=80) txt+='<br><br><strong>Starker Tag.</strong> Genau so weiter.';
-      else if(score>=50) txt+='<br><br><strong>Solider Tag.</strong> Morgen einen drauflegen.';
-      else txt+='<br><br><strong>Schwacher Tag.</strong> Morgen zurück auf die Routine.';
-      if(missed.includes('Führerschein-App')) txt+='<br>→ Führerschein-App direkt nach dem Essen einplanen.';
-      if(missed.includes('Training')) txt+='<br>→ Training direkt nach Heimkommen, bevor du dich setzt.';
-    }
-    aiFBEl.innerHTML=`<div class="ai-bubble"><div class="ai-label">KI Analyse</div>${txt}</div>`;
-  }
-}
-
-function saveDay(){
-  const score=calcScore();
-  const now=new Date();
-  const dayNames=['So','Mo','Di','Mi','Do','Fr','Sa'];
-  const dName=dayNames[now.getDay()];
-  const entry=weekHistory.find(d=>d.day===dName);
-  if(entry&&score!==null) entry.score=score;
-  saveWeekHistory();
-  renderFeedback();
-  const btn=document.querySelector('.save-btn');
-  if(btn){ btn.textContent='Gespeichert ✓'; setTimeout(()=>{ btn.textContent='Tag speichern'; },2000); }
 }
 
 // ═══════════════════════════════════════════
@@ -2811,70 +2788,6 @@ Führe mich durch den Review. Fang mit dem Bereich an wo ich mich am meisten ver
   } catch(e) {
     document.getElementById('aiLoading').style.display = 'none';
     appendMsg('assistant', formatAIMessage('Verbindungsfehler beim Review. Nochmal versuchen.'));
-  }
-}
-
-// ═══════════════════════════════════════════
-// TAGES-FEEDBACK (manuell per Button im Feedback-Tab)
-// ═══════════════════════════════════════════
-async function generateDailyFeedback(){
-  const aiBtn = document.querySelector('[data-page="ai"]');
-  showPage('ai', aiBtn);                              // bewusster Tab-Wechsel – Baran hat getippt
-  if(!window.ANTHROPIC_KEY && !chatProxyUrl()){ appendMsg('assistant', formatAIMessage('Kein API-Key gesetzt – im Einstellungen-Tab eintragen, dann gibt es Tagesfeedback.')); return; }
-
-  const score = calcScore();
-  const done    = HABITS.filter(h=>habitStatus[h.id]==='done').map(h=>h.name);
-  const missed  = HABITS.filter(h=>habitStatus[h.id]==='missed').map(h=>h.name);
-  const partial = HABITS.filter(h=>habitStatus[h.id]==='partial').map(h=>h.name);
-  const kcal = todayLog.reduce((s,l)=>s+l.kcal,0);
-  const protein = todayLog.reduce((s,l)=>s+(l.protein||0),0);
-  const todaySplit = getTodaySplitKey();
-  const trainTxt = todaySplit ? (isDayDone(todaySplit)?'Training erledigt ✓':'Trainingstag, aber offen') : 'Ruhetag';
-
-  const summary = `Tagesabschluss. Daten von HEUTE:
-- Habit-Score: ${score!==null?score+'%':'nicht bewertet'}
-- Erledigt: ${done.join(', ')||'–'} | Teilweise: ${partial.join(', ')||'–'} | Nicht geschafft: ${missed.join(', ')||'–'}
-- Kalorien: ${kcal}/${getKcalGoal()} | Protein: ${protein}/${getProteinGoal()}g | Wasser: ${waterL.toFixed(1)}/${getWaterGoal()}L
-- Training: ${trainTxt}
-Gib mir ein kurzes, ehrliches Tagesfeedback (2-4 Sätze, Deutsch, Kumpel-Ton): was lief gut, was morgen besser, EINE konkrete Sache für morgen. Keine Update-Tags.`;
-
-  appendMsg('assistant', formatAIMessage('🌙 **Tagesfeedback** – einen Moment…'));
-  document.getElementById('aiLoading').style.display = 'block';
-  try{
-    const res = await fetch(apiEndpoint(), {
-      method:'POST', headers: apiHeaders(),
-      body: JSON.stringify({ model:ADVISOR_MODEL, max_tokens:400, system: buildSystemBlocks(),
-        messages: buildApiMessages(summary) })
-    });
-    const data = await res.json();
-    document.getElementById('aiLoading').style.display = 'none';
-    const reply = (data && data.content && data.content[0] && data.content[0].text || '').trim();
-    if(reply){
-      chatHistory.push({role:'user', content:'[Tagesfeedback angefordert]'});
-      chatHistory.push({role:'assistant', content: reply});
-      saveChatHistory();
-      appendMsg('assistant', formatAIMessage(reply));
-      updateTodayScore();                              // Tag final festhalten
-    }
-  }catch(e){ document.getElementById('aiLoading').style.display='none'; appendMsg('assistant', formatAIMessage('Verbindungsfehler beim Tagesfeedback. Nochmal versuchen.')); }
-}
-
-// Show review button on Sundays
-function checkSundayReview(){
-  const isSunday = new Date().getDay() === 0;
-  if(!isSunday) return;
-  const lastReview = localStorage.getItem('baran_last_review');
-  const today = new Date().toDateString();
-  if(lastReview === today) return;
-  // Add review button to feedback page
-  const saveBtn = document.querySelector('.save-btn');
-  if(saveBtn && !document.getElementById('weeklyReviewBtn')){
-    const btn = document.createElement('button');
-    btn.id = 'weeklyReviewBtn';
-    btn.style.cssText = "width:100%;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:14px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;color:var(--lehrbauhof);cursor:pointer;margin-top:8px;";
-    btn.textContent = 'Wöchentlicher KI-Review starten';
-    btn.onclick = () => { localStorage.setItem('baran_last_review', today); startWeeklyReview(); };
-    saveBtn.after(btn);
   }
 }
 
@@ -3383,29 +3296,6 @@ function renderStats(){ try {
   const stn = document.getElementById('stat-training-num');
   if(stn) stn.textContent = `${daysDone}/${TRAINING_DAYS.length}`;
 
-  // Kalorien-Chart: letzte 14 Tage aus dem Tagesbuch (heute live)
-  const kcEl = document.getElementById('kcalChart');
-  if(kcEl){
-    const dh = getDayHistory();
-    const days = [];
-    for(let i=13; i>=0; i--){
-      const d = new Date(); d.setDate(d.getDate()-i);
-      const ds = d.toDateString();
-      const kcal = i===0 ? todayLog.reduce((s,l)=>s+l.kcal,0) : ((dh[ds]&&dh[ds].kcalTotal)||0);
-      days.push({d, kcal});
-    }
-    const goal = getKcalGoal();
-    const maxV = Math.max(goal, ...days.map(x=>x.kcal)) * 1.05;
-    kcEl.innerHTML = `<div style="display:flex;align-items:flex-end;gap:4px;height:96px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 12px 8px;">${days.map(x=>{
-      const h = Math.max(3, Math.round(x.kcal/maxV*64));
-      const pct = x.kcal/goal;
-      const col = x.kcal===0 ? 'var(--surface2)' : pct>=0.9 ? 'var(--ok)' : pct>=0.6 ? 'var(--caution)' : 'var(--over)';
-      const lbl = x.d.toLocaleDateString('de-DE',{weekday:'short'}).slice(0,2);
-      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;"><div style="width:100%;max-width:14px;height:${h}px;background:${col};border-radius:3px;"></div><div style="font-size:9px;color:var(--muted);">${lbl}</div></div>`;
-    }).join('')}</div>
-    <div style="font-size:11px;color:var(--muted);margin-top:6px;">Referenz: heutiges Ziel <span class="mono">${goal.toLocaleString('de-DE')} kcal</span> · grün = ≥ 90 %</div>`;
-  }
-
   // Kcal today
   const todayKcal = todayLog.reduce((s,l)=>s+l.kcal,0);
   animateCount(document.getElementById('stat-kcal-num'), todayKcal||0, {thousand:true, instant:statsAnimated});
@@ -3416,8 +3306,8 @@ function renderStats(){ try {
 
   // Water bar
   const wGoal = getWaterGoal();
-  const wPct = Math.min((waterL/wGoal)*100, 100);
-  document.getElementById('waterStatBar').style.width = wPct + '%';
+  const wPct = Math.min(waterL/wGoal, 1);
+  document.getElementById('waterStatBar').style.transform = 'scaleX(' + wPct + ')';
   animateCount(document.getElementById('waterStatVal'), waterL, {dec:1, suffix:'L', instant:statsAnimated});
   document.getElementById('waterStatGoal').textContent = `von ${wGoal}L Ziel`;
   const wgr = document.getElementById('waterStatGoalRight'); if(wgr) wgr.textContent = wGoal+'L';
@@ -3439,18 +3329,6 @@ function renderStats(){ try {
     </div>`;
   }).join('');
   tlEl.innerHTML = rows || '<div style="font-size:14px;color:var(--muted);padding:10px;">Noch keine Trainingsdaten diese Woche.</div>';
-
-  // Heatmap
-  const days = ['Mo','Di','Mi','Do','Fr','Sa','So'];
-  const statsHeatmapEl = document.getElementById('statsHeatmap');
-  if(statsHeatmapEl) statsHeatmapEl.innerHTML = weekHistory.map((d,i)=>{
-    const cls = d.score===null ? 'empty' : d.score>=80 ? 'great' : d.score>=50 ? 'ok' : 'bad';
-    const colors = {great:'rgba(123,174,112,0.22)',ok:'rgba(224,169,59,0.18)',bad:'rgba(210,106,78,0.18)',empty:'var(--surface2)'};
-    const textColors = {great:'var(--ok)',ok:'var(--caution)',bad:'var(--over)',empty:'var(--muted)'};
-    return `<div style="aspect-ratio:1;border-radius:6px;background:${colors[cls]};display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:11px;font-weight:500;color:${textColors[cls]};">
-      <div>${days[i]}</div><div style="font-size:11px;margin-top:2px;">${d.score!==null?d.score+'%':''}</div>
-    </div>`;
-  }).join('');
 
   statsAnimated = true;
   } catch(e){ console.error('renderStats error:', e); }
@@ -3738,6 +3616,7 @@ renderExercises();
 // Beim Start dort weitermachen, wo Baran zuletzt war (gleicher Tag)
 (function restoreLastTab(){
   try{
+    if(lastTab==='feedback' || lastTab==='stats') lastTab = 'goals'; // alte Tabs → fusionierter Tab
     if(lastTab && lastTab !== 'plan'){
       const navBtn = document.querySelector(`[data-page="${lastTab}"]`);
       if(navBtn) showPage(lastTab, navBtn);
@@ -3745,7 +3624,6 @@ renderExercises();
   }catch(e){}
 })();
 checkInstallBanner();
-checkSundayReview();
 checkNotifPermission();
 scheduleWaterReminders();
 registerServiceWorker();

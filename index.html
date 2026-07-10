@@ -28,10 +28,8 @@
 <div class="bottom-nav">
   <button class="nav-item active" data-page="plan" onclick="showPage('plan',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg></span>Plan</button>
   <button class="nav-item" data-page="nutrition" onclick="showPage('nutrition',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg></span>Essen</button>
-  <button class="nav-item" data-page="feedback" onclick="showPage('feedback',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></span>Check</button>
   <button class="nav-item" data-page="training" onclick="showPage('training',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></span>Training</button>
-  <button class="nav-item" data-page="goals" onclick="showPage('goals',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Ziele</button>
-  <button class="nav-item" data-page="stats" onclick="showPage('stats',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></svg></span>Stats</button>
+  <button class="nav-item" data-page="goals" onclick="showPage('goals',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></span>Ziele &amp; Stats</button>
   <button class="nav-item" data-page="ai" onclick="showPage('ai',this)"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.94 14.06A2 2 0 0 0 8.5 12.63l-5.4-1.4a.4.4 0 0 1 0-.78l5.4-1.4A2 2 0 0 0 9.94 7.6l1.4-5.4a.4.4 0 0 1 .78 0l1.4 5.4a2 2 0 0 0 1.44 1.44l5.4 1.4a.4.4 0 0 1 0 .78l-5.4 1.4a2 2 0 0 0-1.44 1.44l-1.4 5.4a.4.4 0 0 1-.78 0z"/></svg></span>KI</button>
 </div>
 
@@ -225,58 +223,6 @@
   <button class="reset-btn" onclick="resetDay()">Tag zurücksetzen</button>
 </div>
 
-<!-- ════════════════════════════════════════════
-     PAGE: FEEDBACK
-════════════════════════════════════════════ -->
-
-
-
-<!-- PAGE: FEEDBACK -->
-<div class="page" id="page-feedback">
-  <div class="header">
-    <div class="header-label">Tagesabschluss</div>
-    <div class="header-title">Wie lief<br><span>heute?</span></div>
-  </div>
-  <div class="feedback-date" id="feedbackDate"></div>
-  <div class="score-card">
-    <div class="score-num" id="scoreNum">–</div>
-    <div class="score-label">Tages-Score</div>
-    <div class="score-bar"><div class="score-bar-fill" id="scoreBarFill" style="width:0%;background:var(--accent)"></div></div>
-  </div>
-  <div class="section-title">Deine Woche</div>
-  <div class="heatmap" id="heatmap"></div>
-  <div style="display:flex;align-items:center;gap:8px;margin:24px 0 10px;">
-    <div class="section-title" style="margin:0;flex:1;">Was hast du heute gemacht?</div>
-    <button id="habitEditBtn" onclick="toggleHabitEdit()" class="toggle-btn" style="padding:6px 12px;font-size:12px;">Bearbeiten</button>
-  </div>
-  <div class="habit-card" id="habitCard"></div>
-  <!-- Habit edit modal -->
-  <div class="block-modal-overlay" id="habitModal">
-    <div class="block-modal">
-      <div class="block-modal-header">
-        <div class="block-modal-title" id="habitModalTitle">Habit bearbeiten</div>
-        <button class="block-modal-close" onclick="closeHabitModal()">✕</button>
-      </div>
-      <div class="block-modal-label">Name</div>
-      <input type="text" id="hm-name" placeholder="z.B. Lesen">
-      <div class="block-modal-label">Frage / Beschreibung</div>
-      <input type="text" id="hm-desc" placeholder="z.B. 20 Min gelesen?">
-      <label style="display:flex;align-items:center;gap:8px;margin:6px 0 12px;font-size:13px;color:var(--muted);cursor:pointer;">
-        <input type="checkbox" id="hm-mandatory" style="width:16px;height:16px;accent-color:var(--accent);cursor:pointer;">Pflicht (nicht verhandelbar)
-      </label>
-      <div class="block-modal-actions">
-        <button class="bm-save" onclick="saveHabitModal()">Speichern</button>
-        <button class="bm-del" id="hmDelBtn" onclick="deleteHabit()" aria-label="Habit löschen"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>
-      </div>
-    </div>
-  </div>
-  <!-- AI feedback -->
-  <div class="section-title">Feedback</div>
-  <div id="aiFeedback"></div>
-  <button class="save-btn" onclick="saveDay()">Tag speichern</button>
-  <button onclick="generateDailyFeedback()" style="width:100%;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:14px;font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;color:var(--accent);cursor:pointer;margin-top:8px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px;"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>Tagesfeedback vom Coach holen</button>
-</div>
-
 
 <!-- PAGE: TRAINING -->
 <div class="page" id="page-training">
@@ -303,20 +249,6 @@
     <div id="progressionHintText" style="font-size:14px;color:var(--muted);line-height:1.5;"></div>
   </div>
   <div id="exerciseList"></div>
-  <!-- Exercise log modal -->
-  <div id="logModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;justify-content:center;">
-    <div style="background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + var(--safe-bottom));width:100%;max-width:480px;border-top:1px solid var(--border);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:800;color:var(--accent);" id="logModalTitle">Training loggen</div>
-        <button onclick="closeLogModal()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--muted);cursor:pointer;">✕</button>
-      </div>
-      <div id="logModalLastWeek" style="font-size:11px;color:var(--muted);margin-bottom:14px;"></div>
-      <div id="setsLogger" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;max-height:280px;overflow-y:auto;"></div>
-      <button onclick="addLogSet()" style="width:100%;background:var(--surface2);border:1px dashed var(--border);border-radius:8px;padding:9px;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:12px;">+ Satz hinzufügen</button>
-      <input id="logNote" placeholder="Notiz (optional)..." style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:12px;outline:none;margin-bottom:12px;">
-      <button onclick="saveExerciseLog()" style="width:100%;background:var(--accent);border:none;border-radius:8px;padding:14px;font-family:'IBM Plex Sans',sans-serif;font-size:15px;font-weight:600;color:var(--bg);cursor:pointer;">Speichern</button>
-    </div>
-  </div>
   <!-- Add exercise -->
   <div id="addExercisePanel" style="margin-top:4px;display:none;">
     <button onclick="showAddExercise()" id="addExBtn" style="width:100%;background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:13px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;">+ Neue Übung hinzufügen</button>
@@ -377,10 +309,10 @@
   <div class="tip-card"><strong>Ziel Woche 4:</strong> 5–6 Runden × 3 Min Schatten ohne Einbruch — aus „Kondition ist kacke" wird „Runde 5 noch was im Tank".</div>
 </div>
 
-<!-- PAGE: GOALS -->
+<!-- PAGE: GOALS + STATS -->
 <div class="page" id="page-goals">
   <div class="header">
-    <div class="header-label">Deine Ziele</div>
+    <div class="header-label">Ziele &amp; Stats</div>
     <div class="header-title">Fortschritt<br><span>tracken</span></div>
   </div>
   <div id="calendarBanner" style="display:none;background:var(--surface2);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;margin-bottom:16px;">
@@ -392,6 +324,74 @@
     <button onclick="requestNotifications()" id="notifBtn" style="background:none;border:1px solid var(--rule-strong);border-radius:8px;padding:8px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;color:var(--info);cursor:pointer;white-space:nowrap;">Aktivieren</button>
   </div>
   <div id="notifSettingsContainer" style="display:none;margin-bottom:16px;"></div>
+  <div class="gs-cols">
+  <div class="gs-col">
+
+  <!-- ── GEWICHT (Kernmetrik) ── -->
+  <div class="readout">
+    <div class="readout-top">
+      <span class="eyebrow">Gewicht</span>
+      <span class="today"><span class="today-dot"></span><span id="weightPhaseLabel">Massephase</span></span>
+    </div>
+    <div class="readout-hero">
+      <span class="mono" id="weightNow" style="font-size:42px;font-weight:500;line-height:1;color:var(--ink);">–</span>
+      <span class="readout-goal mono">kg</span>
+    </div>
+    <div id="weightTrend" style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;"></div>
+    <svg id="weightSpark" viewBox="0 0 300 60" preserveAspectRatio="none" style="width:100%;height:60px;margin-top:10px;display:none;"></svg>
+    <div class="readout-rule"></div>
+    <div style="display:flex;gap:8px;">
+      <input type="number" inputmode="decimal" step="0.1" min="40" max="250" id="weightInput" placeholder="heute gewogen…" class="mono" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;color:var(--ink);font-size:15px;outline:none;text-align:center;" onkeydown="if(event.key==='Enter')submitWeight()">
+      <button onclick="submitWeight()" class="custom-add-btn" style="padding:11px 16px;">Eintragen</button>
+    </div>
+  </div>
+
+  <div class="stats-big-grid">
+    <div class="stats-big-card stagger-in" style="animation-delay:0s">
+      <div class="sbc-icon-wrap" style="background:rgba(210,106,78,0.14);color:var(--over);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></div>
+      <div class="sbc-num" id="stat-training-num">–</div>
+      <div class="sbc-label">Trainings</div>
+      <div class="sbc-sub">diese Woche</div>
+    </div>
+    <div class="stats-big-card stagger-in" style="animation-delay:0.06s">
+      <div class="sbc-icon-wrap" style="background:rgba(224,169,59,0.14);color:var(--accent);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
+      <div class="sbc-num" id="stat-kcal-num">–</div>
+      <div class="sbc-label">kcal</div>
+      <div class="sbc-sub">heute</div>
+    </div>
+    <div class="stats-big-card stagger-in" style="animation-delay:0.12s">
+      <div class="sbc-icon-wrap" style="background:rgba(123,174,112,0.14);color:var(--ok);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
+      <div class="sbc-num" id="stat-habits-num">–</div>
+      <div class="sbc-label">Habits</div>
+      <div class="sbc-sub">heute</div>
+    </div>
+  </div>
+
+  <div class="water-stat-card">
+    <div>
+      <div class="eyebrow" style="margin-bottom:4px;">Wasser heute</div>
+      <div class="mono" style="font-size:32px;font-weight:500;color:var(--info);line-height:1;" id="waterStatVal">0L</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="waterStatGoal">von 3.5L Ziel</div>
+    </div>
+    <div style="flex:1;padding-left:20px;display:flex;flex-direction:column;justify-content:center;">
+      <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;">
+        <div id="waterStatBar" style="height:100%;border-radius:999px;background:var(--info);transform-origin:left;transform:scaleX(0);transition:transform var(--t-fill) var(--ease-out);"></div>
+      </div>
+      <div class="mono" style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
+        <span>0L</span><span id="waterStatGoalRight">3.5L</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title">Training Progression</div>
+  <div id="statsTrainingList"></div>
+
+  <div class="section-title">Ausbildungswochen</div>
+  <div id="statsWeekGrid"></div>
+
+  </div>
+  <div class="gs-col">
+
   <div class="section-title">Deine Ziele</div>
   <div id="goalsList"></div>
   <button onclick="openAddGoal()" style="width:100%;background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:13px;font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;margin-bottom:16px;">+ Neues Ziel hinzufügen</button>
@@ -431,6 +431,9 @@
   </button>
   <div class="section-title">Kommende Feiertage & Events</div>
   <div id="holidayList"></div>
+
+  </div>
+  </div><!-- /gs-cols -->
 </div>
 
 <!-- PAGE: AI CHAT -->
@@ -512,84 +515,6 @@
   <button onclick="clearChat()" class="ai-clear-btn">— Chat leeren —</button>
 </div>
 
-<!-- PAGE: STATS -->
-<div class="page" id="page-stats">
-  <div class="header">
-    <div class="header-label">Deine Entwicklung</div>
-    <div class="header-title">Stats &amp;<br><span>Fortschritt</span></div>
-  </div>
-
-  <!-- ── GEWICHT (Kernmetrik) ── -->
-  <div class="readout">
-    <div class="readout-top">
-      <span class="eyebrow">Gewicht</span>
-      <span class="today"><span class="today-dot"></span><span id="weightPhaseLabel">Massephase</span></span>
-    </div>
-    <div class="readout-hero">
-      <span class="mono" id="weightNow" style="font-size:42px;font-weight:500;line-height:1;color:var(--ink);">–</span>
-      <span class="readout-goal mono">kg</span>
-    </div>
-    <div id="weightTrend" style="font-size:13px;color:var(--muted);margin-top:8px;line-height:1.5;"></div>
-    <svg id="weightSpark" viewBox="0 0 300 60" preserveAspectRatio="none" style="width:100%;height:60px;margin-top:10px;display:none;"></svg>
-    <div class="readout-rule"></div>
-    <div style="display:flex;gap:8px;">
-      <input type="number" inputmode="decimal" step="0.1" min="40" max="250" id="weightInput" placeholder="heute gewogen…" class="mono" style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:11px 12px;color:var(--ink);font-size:15px;outline:none;text-align:center;" onkeydown="if(event.key==='Enter')submitWeight()">
-      <button onclick="submitWeight()" class="custom-add-btn" style="padding:11px 16px;">Eintragen</button>
-    </div>
-  </div>
-
-  <div class="stats-big-grid">
-    <div class="stats-big-card stagger-in" style="animation-delay:0s">
-      <div class="sbc-icon-wrap" style="background:rgba(210,106,78,0.14);color:var(--over);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7-7"/><path d="m14 21 7-7"/></svg></div>
-      <div class="sbc-num" id="stat-training-num">–</div>
-      <div class="sbc-label">Trainings</div>
-      <div class="sbc-sub">diese Woche</div>
-    </div>
-    <div class="stats-big-card stagger-in" style="animation-delay:0.06s">
-      <div class="sbc-icon-wrap" style="background:rgba(224,169,59,0.14);color:var(--accent);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div>
-      <div class="sbc-num" id="stat-kcal-num">–</div>
-      <div class="sbc-label">kcal</div>
-      <div class="sbc-sub">heute</div>
-    </div>
-    <div class="stats-big-card stagger-in" style="animation-delay:0.12s">
-      <div class="sbc-icon-wrap" style="background:rgba(123,174,112,0.14);color:var(--ok);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg></div>
-      <div class="sbc-num" id="stat-habits-num">–</div>
-      <div class="sbc-label">Habits</div>
-      <div class="sbc-sub">heute</div>
-    </div>
-  </div>
-
-  <div class="water-stat-card">
-    <div>
-      <div class="eyebrow" style="margin-bottom:4px;">Wasser heute</div>
-      <div class="mono" style="font-size:32px;font-weight:500;color:var(--info);line-height:1;" id="waterStatVal">0L</div>
-      <div style="font-size:13px;color:var(--muted);margin-top:2px;" id="waterStatGoal">von 3.5L Ziel</div>
-    </div>
-    <div style="flex:1;padding-left:20px;display:flex;flex-direction:column;justify-content:center;">
-      <div style="height:8px;background:var(--surface2);border-radius:999px;overflow:hidden;margin-bottom:6px;">
-        <div id="waterStatBar" style="height:100%;border-radius:999px;background:var(--info);transition:width var(--t-fill) var(--ease-out);width:0%;"></div>
-      </div>
-      <div class="mono" style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);">
-        <span>0L</span><span id="waterStatGoalRight">3.5L</span>
-      </div>
-    </div>
-  </div>
-
-
-
-  <div class="section-title">Kalorien – letzte 14 Tage</div>
-  <div id="kcalChart"></div>
-
-  <div class="section-title">Wochen-Score</div>
-  <div class="stats-heatmap" id="statsHeatmap"></div>
-
-  <div class="section-title">Training Progression</div>
-  <div id="statsTrainingList"></div>
-
-  <div class="section-title">Ausbildungswochen</div>
-  <div id="statsWeekGrid"></div>
-
-</div>
 <!-- Confirm-Sheet (ersetzt window.confirm – in iOS-Standalone-PWAs unzuverlässig) -->
 <div class="block-modal-overlay" id="confirmSheet">
   <div class="block-modal">
