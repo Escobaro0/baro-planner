@@ -3395,7 +3395,8 @@ function syncConfigured(){ return !!(syncUrl() && syncSecret()); }
 // Wird vom localStorage.setItem-Hook bei JEDER Datenänderung gerufen.
 function markMutation(key){
   if(key==='baran_api_key'||key==='baran_sync_url'||key==='baran_sync_secret'||
-     key==='baran_last_mutation'||key==='baran_cloud_backup') return;
+     key==='baran_last_mutation'||key==='baran_cloud_backup'||
+     key==='baran_anon_key'||key==='baran_device_id') return;
   try{ localStorage.setItem('baran_last_mutation', String(Date.now())); }catch(e){}
   if(SYNC.applyingRemote || !SYNC.enabled) return;
   scheduleCloudPush();
@@ -3412,14 +3413,15 @@ function scheduleCloudPush(){
 
 async function pushCloud(){
   if(!syncConfigured() || !SYNC.dirty) return;
-  const body = JSON.stringify({ data: buildStateBundle(), mutatedAt: localMutationTs()||Date.now() });
+  const mutatedAt = localMutationTs()||Date.now();
+  const body = JSON.stringify({ data: buildStateBundle(), mutatedAt });
   try{
     const r = await fetch(syncUrl(), {
       method:'POST', keepalive:true,
       headers:{'Content-Type':'application/json','X-Baro-Secret':syncSecret()},
       body
     });
-    if(r.ok){ SYNC.dirty=false; SYNC.lastSync=Date.now(); renderSyncStatus('✅ gesynct '+new Date().toLocaleTimeString('de-DE')); }
+    if(r.ok){ SYNC.dirty=false; SYNC.lastSync=Date.now(); renderSyncStatus('✅ gesynct '+new Date().toLocaleTimeString('de-DE')); ringDoorbell(mutatedAt); }
     else { renderSyncStatus('⚠️ Senden fehlgeschlagen ('+r.status+')'); }
   }catch(e){ renderSyncStatus('⚠️ offline – Senden wird nachgeholt'); /* dirty bleibt */ }
 }
@@ -3457,13 +3459,18 @@ function installStorageHook(){
 function renderSyncStatus(msg){
   const el = document.getElementById('syncStatus');
   if(!el) return;
-  el.textContent = msg || (syncConfigured() ? 'eingerichtet' : 'nicht eingerichtet');
+  if(msg !== undefined) SYNC.lastMsg = msg;
+  const base = SYNC.lastMsg || (syncConfigured() ? 'eingerichtet' : 'nicht eingerichtet');
+  const live = (typeof RT !== 'undefined' && RT.state === 'SUBSCRIBED') ? ' · 🟢 live' : '';
+  el.textContent = base + live;
 }
 function renderSyncInputs(){
   const u = document.getElementById('syncUrlInput');
   const s = document.getElementById('syncSecretInput');
   if(u) u.value = syncUrl();
   if(s) s.value = syncSecret();
+  const ak = document.getElementById('syncAnonKeyInput');
+  if(ak){ try{ ak.value = localStorage.getItem('baran_anon_key')||''; }catch(e){} }
   const p = document.getElementById('chatProxyInput');
   if(p) p.value = chatProxyUrl();
   const v = document.getElementById('vapidKeyInput');
@@ -3526,8 +3533,10 @@ async function enablePush(){
 function saveSyncConfig(){
   const u = document.getElementById('syncUrlInput');
   const s = document.getElementById('syncSecretInput');
+  const ak = document.getElementById('syncAnonKeyInput');
   try{ if(u) localStorage.setItem('baran_sync_url',(u.value||'').trim()); }catch(e){}
   try{ if(s) localStorage.setItem('baran_sync_secret',(s.value||'').trim()); }catch(e){}
+  try{ if(ak) localStorage.setItem('baran_anon_key',(ak.value||'').trim()); }catch(e){}
   if(syncConfigured()){
     SYNC.enabled = true;
     renderSyncStatus('synchronisiere…');
@@ -3535,6 +3544,7 @@ function saveSyncConfig(){
   } else {
     renderSyncStatus('unvollständig – URL + Secret nötig');
   }
+  initRealtime(); // Anon-Key neu/geändert/geleert → Live-Sync entsprechend an/aus
 }
 function forcePush(){ SYNC.dirty = true; pushCloud(); }
 
@@ -3547,11 +3557,101 @@ function initCloudSync(){
   } else {
     SYNC.enabled = true; // ohne Konfig läuft die App normal lokal weiter
   }
+  initRealtime();
   document.addEventListener('visibilitychange', ()=>{
     if(document.hidden){ if(SYNC.dirty) pushCloud(); }      // App in den Hintergrund → letzten Stand sichern
-    else { pullCloud(); }                                    // App nach vorne → Stand vom anderen Gerät holen
+    else {
+      pullCloud();                                           // App nach vorne → Stand vom anderen Gerät holen
+      // iOS killt Websockets im Hintergrund → Kanal bei Bedarf neu aufbauen
+      if(realtimeConfigured() && (!RT.channel || RT.channel.state !== 'joined')) initRealtime();
+    }
   });
   window.addEventListener('online', ()=>{ if(SYNC.dirty) pushCloud(); });
+}
+
+// ═══════════════════════════════════════════
+// REALTIME DOORBELL — Supabase Broadcast als "Klingel".
+// Datenpfad bleibt die Edge Function (Secret serverseitig); der Broadcast
+// trägt NIE Nutzdaten, nur {mutatedAt, device}. Empfänger validiert per
+// pullCloud gegen den echten Cloud-Stand (Last-Write-Wins wie gehabt).
+// ═══════════════════════════════════════════
+const RT = { client:null, channel:null, state:'off', loading:null, lastPull:0, keyUsed:'' };
+
+function anonKey(){ try{ return (localStorage.getItem('baran_anon_key')||'').trim(); }catch(e){ return ''; } }
+function deviceId(){
+  try{
+    let id = localStorage.getItem('baran_device_id');
+    if(!id){ id = Math.random().toString(36).slice(2) + Date.now().toString(36); localStorage.setItem('baran_device_id', id); }
+    return id;
+  }catch(e){ return 'unknown'; }
+}
+function supabaseProjectUrl(){
+  const m = syncUrl().match(/^(https:\/\/[^\/]+\.supabase\.co)\/functions\//);
+  return m ? m[1] : '';
+}
+function realtimeConfigured(){ return !!(syncConfigured() && anonKey() && supabaseProjectUrl()); }
+
+// supabase-js v2 (UMD) lazy vom CDN – nur wenn Live-Sync konfiguriert ist.
+function loadSupabaseJs(){
+  if(window.supabase && window.supabase.createClient) return Promise.resolve();
+  if(RT.loading) return RT.loading;
+  RT.loading = new Promise((resolve, reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    const to = setTimeout(()=>{ RT.loading = null; reject(new Error('timeout')); }, 10000);
+    s.onload = ()=>{ clearTimeout(to); resolve(); };
+    s.onerror = ()=>{ clearTimeout(to); RT.loading = null; reject(new Error('load failed')); };
+    document.head.appendChild(s);
+  });
+  return RT.loading;
+}
+
+async function initRealtime(){
+  try{
+    if(!realtimeConfigured()){ rtTeardown(); return; }
+    await loadSupabaseJs();
+    // Key geändert → Client neu aufbauen
+    if(RT.client && RT.keyUsed !== anonKey()){ rtTeardown(); RT.client = null; }
+    if(!RT.client){
+      RT.client = window.supabase.createClient(supabaseProjectUrl(), anonKey(),
+        { auth:{ persistSession:false, autoRefreshToken:false } });
+      RT.keyUsed = anonKey();
+    }
+    rtSubscribe();
+  }catch(e){ RT.state = 'off'; renderSyncStatus(); }
+}
+
+function rtSubscribe(){
+  if(!RT.client) return;
+  if(RT.channel){ try{ RT.client.removeChannel(RT.channel); }catch(e){} RT.channel = null; }
+  RT.channel = RT.client.channel('baro-doorbell', { config:{ broadcast:{ self:false } } })
+    .on('broadcast', { event:'mutated' }, onDoorbell)
+    .subscribe(status => { RT.state = status; renderSyncStatus(); });
+}
+
+function onDoorbell(msg){
+  const p = (msg && msg.payload) || {};
+  if(p.device === deviceId()) return;               // eigenes Echo (doppelt gesichert)
+  if(SYNC.applyingRemote) return;                    // gerade am Übernehmen
+  if(Number(p.mutatedAt||0) <= localMutationTs()) return; // nichts Neues
+  if(Date.now() - RT.lastPull < 1500) return;        // Pull-Sturm bremsen
+  RT.lastPull = Date.now();
+  pullCloud();
+}
+
+function ringDoorbell(mutatedAt){
+  try{
+    if(RT.channel && RT.state === 'SUBSCRIBED'){
+      RT.channel.send({ type:'broadcast', event:'mutated', payload:{ mutatedAt, device: deviceId() } });
+    }
+  }catch(e){} // Klingel-Ausfall ist ok – das andere Gerät zieht beim nächsten Öffnen
+}
+
+function rtTeardown(){
+  if(RT.client && RT.channel){ try{ RT.client.removeChannel(RT.channel); }catch(e){} }
+  RT.channel = null;
+  RT.state = 'off';
+  renderSyncStatus();
 }
 
 // ═══════════════════════════════════════════
