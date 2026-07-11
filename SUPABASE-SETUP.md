@@ -124,6 +124,23 @@ bei Session-Start.
 
 ---
 
+## 7b. Live-Sync (Realtime-Klingel, optional — iPhone ↔ iPad in Echtzeit)
+
+Ohne das hier syncen die Geräte beim Öffnen/App-Wechsel. Mit Live-Sync sieht das iPhone
+einen iPad-Haken in ~2 Sekunden, solange beide Apps offen sind.
+
+1. Dashboard → **Project Settings → API** → **anon / public** Key kopieren.
+2. In der App (auf **beiden** Geräten): Coach-Tab → Gedächtnis & Obsidian → Auto-Sync →
+   Feld **„Anon Key"** einfügen → **Speichern**. Status zeigt dann „… · 🟢 live".
+
+Technik: Supabase Realtime **Broadcast** als reine „Klingel" — Gerät A pusht seinen Stand
+wie bisher über `baro-sync` und funkt danach nur `{mutatedAt, device}`. Gerät B hört das
+und zieht den Stand über die gesicherte Function. Kein Tabellen-/Replication-Setup nötig.
+
+Sicherheit: Der Anon-Key ist bei Supabase public by design. `baro_state` hat RLS **ohne**
+Policies — der Anon-Key kommt an keine Daten. Im Broadcast stecken nie Nutzdaten, nur
+Zeitstempel + zufällige Geräte-ID. Der Datenpfad bleibt komplett hinter deinem Secret.
+
 ## 8. Chat-Proxy `baro-chat` (optional, empfohlen)
 
 Damit läuft der Coach über deine Supabase-Function statt direkt vom Handy zu Anthropic —
