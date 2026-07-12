@@ -1425,9 +1425,14 @@ function restoreFromBackup(data){
   }
   try{
     renderExercises(); renderGoals(); updateRing();
+    if(typeof renderMealGrid==='function') renderMealGrid();       // Essen: Kachel-Häkchen
+    if(typeof renderLog==='function') renderLog();                 // Essen: "Heute gegessen"
+    if(typeof applyPhaseUI==='function') applyPhaseUI();           // Essen: Phase-Segmente
+    if(typeof updateNutritionNote==='function') updateNutritionNote();
     if(typeof renderPlan==='function') renderPlan();
     if(typeof renderWeeks==='function') renderWeeks();
     if(typeof renderWeight==='function') renderWeight();
+    if(typeof renderStats==='function') renderStats();             // Ziele & Stats live
     if(typeof updateTodayScore==='function') updateTodayScore();
     if(typeof renderMemoryStatus==='function') renderMemoryStatus();
   }catch(e){}
